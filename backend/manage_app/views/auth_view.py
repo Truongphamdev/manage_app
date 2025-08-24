@@ -1,7 +1,9 @@
 from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny,IsAuthenticated
-from backend.manage_app.serializers.auth_serializer import UserRegistrationSerializer,UserLoginSerializer,SupplierSerializer,CustomerSerializer
+from serializers import UserRegistrationSerializer,UserLoginSerializer,SupplierSerializer,\
+CustomerSerializer,UserUpdateSerializer,ChangePasswordSerializer
+
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken,TokenError
 from models import User,Supplier,Customer
@@ -39,4 +41,25 @@ class LoginView(APIView):
                 'refresh': str(refresh),
                 'user': user_data,
             }, status=200)
+        return Response(serializer.errors, status=400)
+# update
+class UpdateUserView(APIView):
+    permission_classes = [IsAuthenticated]
+    def put(self,request,*args,**kwargs):
+        serializer = UserUpdateSerializer(request.user, data=request.data,partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({'result':"Cập nhật thành công"}, status=200)
+        return Response(serializer.errors, status=400)
+
+# changepassword
+class ChangePasswordView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def put(self, request, *args, **kwargs):
+        user = request.user
+        serializer = ChangePasswordSerializer(user, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({'result': "Đổi mật khẩu thành công"}, status=200)
         return Response(serializer.errors, status=400)
