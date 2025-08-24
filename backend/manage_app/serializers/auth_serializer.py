@@ -81,3 +81,68 @@ class SupplierSerializer(serializers.ModelSerializer):
     class Meta:
         model = Supplier
         fields = ['id', 'user', 'full_name', 'address', 'phone']
+
+# update
+class UserUpdateSerializer(serializers.ModelSerializer):
+    full_name = serializers.CharField(required=True)
+    address = serializers.CharField(required=False, allow_blank=True)
+    phone = serializers.CharField(required=False, allow_blank=True)
+
+    class Meta:
+        model = User
+        fields = ['full_name', 'address', 'phone']
+    def update(self, instance, validated_data):
+        full_name = validated_data.get('full_name', instance.username)
+        address = validated_data.get('address', instance.address)
+        phone = validated_data.get('phone', instance.phone)
+        if full_name:
+            instance.username = full_name
+        instance.save()
+        if instance.role == "supplier":
+            supplier = Supplier.objects.get(user = instance)
+            if full_name:
+                supplier.full_name = full_name
+            if address is not None:
+                supplier.address = address
+            if phone is not None:
+                supplier.phone = phone
+            supplier.save()
+        if instance.role == "user":
+            customer = Customer.objects.get(user = instance)
+            if full_name:
+                customer.full_name = full_name
+            if address is not None:
+                customer.address = address
+            if phone is not None:
+                customer.phone = phone
+            customer.save()
+        return instance
+# changepassword
+class ChangePasswordSerializer(serializers.Serializer):
+    old_password = serializers.CharField(required=True, write_only=True)
+    new_password = serializers.CharField(required=True, write_only=True)
+    def validate_old_password(self,value):
+        user = self.instance
+        if not user.check_password(value):
+            raise serializers.ValidationError("Mật khẩu cũ không đúng")
+        return value
+
+    def validate_new_password(self, value):
+        if len(value) < 8:
+            raise serializers.ValidationError("Mật khẩu mới phải có ít nhất 8 ký tự")
+        if len(value) > 20:
+            raise serializers.ValidationError("Mật khẩu mới không được vượt quá 20 ký tự")
+        return value
+
+    def validate(self, attrs):
+        if attrs['old_password'] == attrs['new_password']:
+            raise serializers.ValidationError("Mật khẩu mới không được trùng với mật khẩu cũ")
+        return attrs
+    def save(self):
+        user = self.instance
+        try:
+            user.set_password(self.validated_data['new_password'])
+            user.save()
+            return user
+        except Exception as e:
+            raise serializers.ValidationError(f"Lỗi khi lưu mật khẩu: {str(e)}")
