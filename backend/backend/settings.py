@@ -40,6 +40,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     "corsheaders",
     'rest_framework',
+    'rest_framework_simplejwt',
+    'rest_framework_simplejwt.token_blacklist',
     'manage_app'
 ]
 
@@ -75,7 +77,18 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'backend.wsgi.application'
-
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',  # Nếu muốn yêu cầu auth mặc định
+    ],
+    'DEFAULT_PARSER_CLASSES': [
+    'rest_framework.parsers.JSONParser',
+    'rest_framework.parsers.MultiPartParser',
+    'rest_framework.parsers.FormParser',
+]}
 
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
@@ -90,7 +103,10 @@ DATABASES = {
         'PORT': config('DATABASE_PORT', default='5432'),
     }
 }
-
+# đăng nhập bằng email
+AUTHENTICATION_BACKENDS = [
+    'manage_app.backends.EmailBackend',
+]
 # cho biết user dùng ở app nào
 AUTH_USER_MODEL = "manage_app.User"
 # Password validation
