@@ -35,7 +35,7 @@ class LoginView(APIView):
                 user_data = CustomerSerializer(customer).data
             else:
                 user_data = {"id": user.id, "email": user.email}
-
+            user_data['role'] = user.role
             return Response({
                 'access': str(refresh.access_token),
                 'refresh': str(refresh),
