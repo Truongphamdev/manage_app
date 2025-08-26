@@ -66,3 +66,5 @@ class ReportRevennueSerializer(serializers.Serializer):
         orders = Order.objects.filter(orderId__in=Paid_order)
         total = orders.aggregate(total=Sum("total_amount"))["total"] or 0
         return total
+
+
