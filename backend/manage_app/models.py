@@ -91,7 +91,11 @@ class Inventory(models.Model):
     id = models.AutoField(primary_key=True)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.IntegerField()
-    location = models.CharField(max_length=100, blank=True, null=True)
+    location = models.CharField(max_length=100,choices=(
+        ('kho HCM', 'Kho HCM'),
+        ('kho HN', 'Kho HN'),
+        ('kho DN', 'Kho DN'),
+    ), default='kho HCM')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

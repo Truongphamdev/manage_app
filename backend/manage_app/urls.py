@@ -1,5 +1,8 @@
 from django.urls import path
-from .views import RegisterView, LoginView,UserManagementViewSet,ManageProductViewSet
+
+
+from .views import RegisterView, LoginView,UserManagementViewSet,ManageProductViewSet,\
+ReportViewSet,ReportRevennueViewSet
 from rest_framework_simplejwt.views import TokenRefreshView
 
 urlpatterns = [
@@ -21,4 +24,7 @@ urlpatterns = [
     path('admin/products/',ManageProductViewSet.as_view({'post':'create'})),
     path('admin/products/<int:pk>/',ManageProductViewSet.as_view({'put':'update'})),
     path('admin/products/<int:pk>/',ManageProductViewSet.as_view({'delete':'destroy'})),
+    # admin_report
+    path('admin/report/<int:product_id>/<str:start_date>/<str:end_date>/', ReportViewSet.as_view(), name='stock-report'),
+    path('admin/report/revenue/<str:start_date>/<str:end_date>/', ReportRevennueViewSet.as_view(), name='revenue-report'),
 ]
