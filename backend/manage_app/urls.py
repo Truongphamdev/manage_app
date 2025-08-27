@@ -4,7 +4,7 @@ from django.urls import path
 
 from .views import RegisterView, LoginView,UserManagementViewSet,ManageProductViewSet,\
 ReportViewSet,ReportRevennueViewSet,ProsalProductViewSet,ProsalProductAdminViewSet,OrderDetailViewSet,\
-HistoryStockViewSet
+HistoryStockViewSet,CategoryViewSet,CartViewSet
 from rest_framework_simplejwt.views import TokenRefreshView
 
 urlpatterns = [
@@ -35,10 +35,18 @@ urlpatterns = [
      ReportRevennueViewSet.as_view({'get': 'export_report'}), name='revenue-report-export'),
     #  admin prosal
     path('admin/prosal/<int:pk>/', ProsalProductAdminViewSet.as_view({'put': 'prosal_admin'}), name='prosal-admin'),
+    # admincategory
+    path('admin/categories/', CategoryViewSet.as_view({'post': 'create'}), name='add-category'),
+    path('admin/categories/<int:pk>/', CategoryViewSet.as_view({'put': 'update'}), name='update-category'),
+    path('admin/categories/<int:pk>/', CategoryViewSet.as_view({'delete': 'delete'}), name='delete-category'),
     #  supplier
     path('supplier/prosal/', ProsalProductViewSet.as_view({'post': 'create_prosal'}), name='create-prosal'),
     path('supplier/orders/', OrderDetailViewSet.as_view({'get': 'list'}), name='list-orders'),
     path('supplier/orders/<int:pk>/', OrderDetailViewSet.as_view({'get': 'retrieve'}), name='retrieve-order'),
     path('supplier/history-stock/', HistoryStockViewSet.as_view({'get': 'list'}), name='list-history-stock'),
     path('supplier/history-stock/<int:pk>/', HistoryStockViewSet.as_view({'get': 'retrieve'}), name='retrieve-history-stock'),
+    # customer
+    path('customer/cart/', CartViewSet.as_view({'get': 'list'}), name='cart-list'),
+    path('customer/cart/add/', CartViewSet.as_view({'post': 'add_to_cart'}), name='cart-add'),
+    path('customer/cart/remove/<int:pk>/', CartViewSet.as_view({'delete': 'remove_cartitem'}), name='cart-remove'),
 ]
