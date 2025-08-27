@@ -1,8 +1,8 @@
 from rest_framework import viewsets, status
 from rest_framework.response import Response
-from permissions import IsAdminRole
-from models import User,Customer,Supplier
-from serializers import CustomerSupplierUserSerializer
+from ...permissions import IsAdminRole
+from ...models import User,Customer,Supplier
+from ...serializers import CustomerSupplierUserSerializer
 from django.shortcuts import get_object_or_404
 
 class UserManagementViewSet(viewsets.ViewSet):

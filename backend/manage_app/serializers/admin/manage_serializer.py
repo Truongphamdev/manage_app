@@ -1,6 +1,6 @@
 from rest_framework import serializers
-from models import User,Product,Category,Supplier
-from serializers import SupplierSerializer, CustomerSerializer
+from ...models import User,Product,Category,Supplier,Inventory
+from ...serializers import SupplierSerializer, CustomerSerializer
 import cloudinary.uploader
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -32,6 +32,11 @@ class ProductSerializer(serializers.ModelSerializer):
 # createproduct
 
 class CreateProductSerializer(serializers.ModelSerializer):
+    location = serializers.ChoiceField(choices=(
+        ('kho HCM', 'Kho HCM'),
+        ('kho HN', 'Kho HN'),
+        ('kho DN', 'Kho DN'),
+    ), default='kho HCM')
     class Meta:
         model = Product
         fields = ['name', 'image','category', 'supplier', 'price','quantity_stock','cost_price','unit']
@@ -71,12 +76,20 @@ class CreateProductSerializer(serializers.ModelSerializer):
         if data['price'] < data['cost_price']:
             raise serializers.ValidationError("giá hiện tại phải lớn hơn giá nhập vào.")
         return data
+    def validate_location(self, value):
+        if not value:
+            raise serializers.ValidationError("Location thì bắt buộc.")
+        return value
     def create(self, validated_data):
         image = validated_data.pop('image', None)
+        location = validated_data.pop('location', 'kho HCM')
         if image:
             upload_result = cloudinary.uploader.upload(image)
             validated_data['image'] = upload_result.get('secure_url')
-        return Product.objects.create(**validated_data)
+        product = Product.objects.create(**validated_data)
+        
+        Inventory.objects.create(product=product, quantity=product.quantity_stock, location=location)
+        return product
 
 # updateproduct
 class UpdateProductSerializer(serializers.ModelSerializer):
