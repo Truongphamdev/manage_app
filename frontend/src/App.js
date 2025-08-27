@@ -1,20 +1,31 @@
-import logo from './logo.svg';
-import './App.css';
-import {BrowserRouter,Route,Routes} from 'react-router-dom'
-import { ProtectRouter } from './api/ProtectRouter';
-import { Main } from './components/Main';
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import ProtectRouter from './api/ProtectRouter';
+import LoginPage from './pages/LoginPage';
+import RegisterPage from './pages/RegisterPage';
+import AdminPage from './pages/AdminPage';
+import SupplierPage from './pages/SupplierPage';
+import CustomerPage from './pages/CustomerPage';
+import HomePage from './pages/HomePage';
 
 function App() {
   return (
-    <BrowserRouter>
+    <Router>
       <Routes>
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route element={<ProtectRouter/>}>
-          <Route path="/" element={<Main />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
+        <Route path="/" element={<HomePage />} />
+        <Route element={<ProtectRouter allowedRoles={['Admin']} />}>
+          <Route path="/admin" element={<AdminPage />} />
+        </Route>
+        <Route element={<ProtectRouter allowedRoles={['Supplier']} />}>
+          <Route path="/supplier" element={<SupplierPage />} />
+        </Route>
+        <Route element={<ProtectRouter allowedRoles={['Customer']} />}>
+          <Route path="/customer" element={<CustomerPage />} />
         </Route>
       </Routes>
-    </BrowserRouter>
+    </Router>
   );
 }
 
