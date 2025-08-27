@@ -6,3 +6,4 @@ from .admin.manage_serializer import CustomerSupplierUserSerializer,ProductSeria
 from .admin.report import StockReportSerializer,ReportRevennueSerializer
 # supplier
 from .supplier.prosal_product import ProsalProductSerializer,ProsalProductAdminSerializer
+from .supplier.main import OrderDetailSerializer,HistoryStockSerializer

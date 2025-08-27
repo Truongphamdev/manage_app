@@ -9,3 +9,4 @@ from .admin.report import ReportViewSet,ReportRevennueViewSet
 from .admin.prosal_product import ProsalProductAdminViewSet
 # supplier
 from .supplier.prosal_product import ProsalProductViewSet
+from .supplier.main import OrderDetailViewSet,HistoryStockViewSet
