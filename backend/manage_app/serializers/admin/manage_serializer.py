@@ -148,3 +148,4 @@ class UpdateProductSerializer(serializers.ModelSerializer):
             instance.image = image
         instance.save()
         return instance
+    
