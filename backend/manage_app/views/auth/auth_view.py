@@ -1,12 +1,12 @@
 from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny,IsAuthenticated
-from serializers import UserRegistrationSerializer,UserLoginSerializer,SupplierSerializer,\
+from ...serializers import UserRegistrationSerializer,UserLoginSerializer,SupplierSerializer,\
 CustomerSerializer,UserUpdateSerializer,ChangePasswordSerializer
 
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken,TokenError
-from models import User,Supplier,Customer
+from ...models import User,Supplier,Customer
 # Register your views here.
 class RegisterView(APIView):
     permission_classes = [AllowAny]

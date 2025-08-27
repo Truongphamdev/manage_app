@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.db.models import Sum
-from models import StockMovement,Payment,Order
+from ...models import StockMovement,Payment,Order
 
 
 class StockReportSerializer(serializers.Serializer):

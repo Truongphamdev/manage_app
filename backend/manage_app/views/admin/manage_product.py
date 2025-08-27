@@ -1,8 +1,8 @@
 from rest_framework import viewsets, status
 from rest_framework.response import Response
-from permissions import IsAdminRole
-from models import Product,Supplier,Category
-from serializers import ProductSerializer,SupplierSerializer,CategorySerializer,CreateProductSerializer,\
+from ...permissions import IsAdminRole
+from ...models import Product,Supplier,Category
+from ...serializers import ProductSerializer,SupplierSerializer,CategorySerializer,CreateProductSerializer,\
 UpdateProductSerializer
 
 class ManageProductViewSet(viewsets.ViewSet):

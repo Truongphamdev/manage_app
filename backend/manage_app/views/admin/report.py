@@ -2,17 +2,17 @@ from rest_framework import viewsets, status
 from rest_framework.response import Response
 from django.http import HttpResponse
 import csv
-from permissions import IsAdminRole
-from models import StockMovement, Product
-from serializers import StockReportSerializer,ReportRevennueSerializer
+from ...permissions import IsAdminRole
+from ...models import StockMovement, Product
+from ...serializers import StockReportSerializer,ReportRevennueSerializer
 from rest_framework.views import APIView
 from openpyxl import Workbook
 from openpyxl.styles import Font, Alignment, PatternFill
 
 
-class ReportViewSet(APIView):
+class ReportViewSet(viewsets.ViewSet):
     permission_classes = [IsAdminRole]
-    def get(self, request, product_id, start_date, end_date):
+    def list(self, request, product_id, start_date, end_date):
         if not product_id or not start_date or not end_date:
             return Response({"error": "Vui lòng cung cấp product_id, start_date và end_date"}, status=status.HTTP_400_BAD_REQUEST)
         if product_id:
@@ -82,9 +82,9 @@ class ReportViewSet(APIView):
         return response
 
 # báo cáo doanh thu
-class ReportRevennueViewSet(APIView):
+class ReportRevennueViewSet(viewsets.ViewSet):
     permission_classes = [IsAdminRole]
-    def get(self, request, start_date, end_date):
+    def list(self, request, start_date, end_date):
         if not start_date or not end_date:
             return Response({"error": "Vui lòng cung cấp start_date và end_date"}, status=status.HTTP_400_BAD_REQUEST)
 
