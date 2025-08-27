@@ -3,7 +3,8 @@ from django.urls import path
 
 
 from .views import RegisterView, LoginView,UserManagementViewSet,ManageProductViewSet,\
-ReportViewSet,ReportRevennueViewSet,ProsalProductViewSet,ProsalProductAdminViewSet
+ReportViewSet,ReportRevennueViewSet,ProsalProductViewSet,ProsalProductAdminViewSet,OrderDetailViewSet,\
+HistoryStockViewSet
 from rest_framework_simplejwt.views import TokenRefreshView
 
 urlpatterns = [
@@ -36,4 +37,8 @@ urlpatterns = [
     path('admin/prosal/<int:pk>/', ProsalProductAdminViewSet.as_view({'put': 'prosal_admin'}), name='prosal-admin'),
     #  supplier
     path('supplier/prosal/', ProsalProductViewSet.as_view({'post': 'create_prosal'}), name='create-prosal'),
+    path('supplier/orders/', OrderDetailViewSet.as_view({'get': 'list'}), name='list-orders'),
+    path('supplier/orders/<int:pk>/', OrderDetailViewSet.as_view({'get': 'retrieve'}), name='retrieve-order'),
+    path('supplier/history-stock/', HistoryStockViewSet.as_view({'get': 'list'}), name='list-history-stock'),
+    path('supplier/history-stock/<int:pk>/', HistoryStockViewSet.as_view({'get': 'retrieve'}), name='retrieve-history-stock'),
 ]
