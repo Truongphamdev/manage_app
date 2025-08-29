@@ -31,7 +31,7 @@ const OrderList = () => {
                 <td className="px-6 py-4 whitespace-nowrap">{order.status}</td>
                 <td className="px-6 py-4 whitespace-nowrap">{order.total.toLocaleString()} VNĐ</td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <Link to={`/orders/${order.id}`} className="text-blue-600 hover:underline">Chi tiết</Link>
+                  <Link to={`/admin/orders/${order.id}`} className="text-blue-600 hover:underline">Chi tiết</Link>
                 </td>
               </tr>
             ))}

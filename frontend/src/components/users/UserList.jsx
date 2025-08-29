@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 
 const UserList = () => {
   const users = [
@@ -31,6 +32,7 @@ const UserList = () => {
                 <td className="px-6 py-4 whitespace-nowrap">{user.role}</td>
                 <td className="px-6 py-4 whitespace-nowrap">{user.email}</td>
                 <td className="px-6 py-4 whitespace-nowrap">
+                  <Link to={`/admin/users/${user.id}`} className="text-blue-600 hover:underline mr-4">Chi tiết</Link>
                   <button className="text-blue-600 hover:underline mr-4">Sửa</button>
                   <button className="text-red-600 hover:underline">Xóa</button>
                 </td>

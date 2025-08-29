@@ -5,13 +5,13 @@ const ProtectRouter = ({ allowedRoles }) => {
   const token = localStorage.getItem('access');
   const userRole = localStorage.getItem('role'); // Giả sử API trả về role và lưu vào localStorage
 
-  if (!token) {
-    return <Navigate to="/login" replace />;
-  }
+  // if (!token) {
+  //   return <Navigate to="/login" replace />;
+  // }
 
-  if (allowedRoles && !allowedRoles.includes(userRole)) {
-    return <Navigate to="/" replace />;
-  }
+  // if (allowedRoles && !allowedRoles.includes(userRole)) {
+  //   return <Navigate to="/" replace />;
+  // }
 
   return <Outlet />;
 };

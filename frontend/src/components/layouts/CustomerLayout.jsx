@@ -1,6 +1,6 @@
 import React from 'react';
 import { Outlet } from 'react-router-dom';
-import Navbar from '../common/Navbar';
+// import Navbar from '../common/Navbar';
 import Sidebar from '../common/Sidebar';
 import Footer from '../common/Footer';
 import Header from '../common/Header';
@@ -19,7 +19,7 @@ const CustomerLayout = () => {
       <Sidebar menuItems={menuItems} />
       <div className="flex-1 flex flex-col">
         <Header role="Customer" />
-        <Navbar />
+        {/* <Navbar /> */}
         <main className="flex-1 p-6">
           <Outlet />
         </main>
