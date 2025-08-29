@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import All_Api from '../../api/AllApi';
-
+import { useUser } from '../../api/context/UserContext';
 const LoginForm = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errors, setErrors] = useState('');
   const navigate = useNavigate();
   const [rememberMe, setRememberMe] = useState(false);
+  const { setUser } = useUser();
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -21,6 +22,7 @@ const LoginForm = () => {
       sessionStorage.setItem('refresh', response.refresh);
       sessionStorage.setItem('user', JSON.stringify(response.user));
     }
+    setUser(response.user);
     if(response.user.role === 'admin'){
       navigate('/admin');
     } else if(response.user.role === 'supplier'){
@@ -30,6 +32,7 @@ const LoginForm = () => {
     }
     window.alert("Đăng nhập thành công");
     console.log(response);
+    
     } catch (error) {
       setErrors(error.response.data);
     }

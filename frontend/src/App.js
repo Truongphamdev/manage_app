@@ -7,9 +7,11 @@ import AdminPage from './pages/AdminPage';
 import SupplierPage from './pages/SupplierPage';
 import CustomerPage from './pages/CustomerPage';
 import HomePage from './pages/HomePage';
+import { UserProvider } from './api/context/UserContext';
 
 function App() {
   return (
+    <UserProvider>
     <Router>
       <Routes>
         <Route path="/login" element={<LoginPage />} />
@@ -26,6 +28,7 @@ function App() {
         </Route>
       </Routes>
     </Router>
+        </UserProvider>
   );
 }
 

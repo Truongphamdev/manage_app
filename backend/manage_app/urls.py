@@ -12,10 +12,9 @@ urlpatterns = [
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
 
     # Admin user management
-    path('admin/users/', UserManagementViewSet.as_view({'get': 'list_users', 'post': 'create'})),
+    path('admin/users/', UserManagementViewSet.as_view({'get': 'list'})),
     path('admin/users/<int:pk>/', UserManagementViewSet.as_view({
         'get': 'detail_user',
-        'put': 'update',
         'delete': 'destroy'
     })),
     path('admin/users/<int:pk>/block/', UserManagementViewSet.as_view({'put': 'block_user'})),

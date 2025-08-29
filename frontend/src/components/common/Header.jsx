@@ -16,8 +16,8 @@ const Header = ({ role }) => {
         </span>
         <button
           onClick={() => {
-            localStorage.removeItem('access');
-            localStorage.removeItem('user');
+            localStorage.clear();
+            sessionStorage.clear();
             navigate('/login');
           }}
           className="bg-red-500 text-white px-3 py-1 rounded-md hover:bg-red-600"
