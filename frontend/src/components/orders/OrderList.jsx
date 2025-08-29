@@ -3,8 +3,16 @@ import { Link } from 'react-router-dom';
 
 const OrderList = () => {
   const orders = [
-    { id: 1, customer: 'Nguyễn Văn A', date: '2023-10-01', status: 'Pending', total: 1000000 },
-    { id: 2, customer: 'Trần Thị B', date: '2023-10-02', status: 'Confirmed', total: 2000000 },
+    { id: 1, customer: 'Nguyễn Văn A', date: '2025-08-01', status: 'Pending', total: 1000000 },
+    { id: 2, customer: 'Trần Thị B', date: '2025-08-02', status: 'Confirmed', total: 2000000 },
+    { id: 3, customer: 'Lê Văn C', date: '2025-08-03', status: 'Delivered', total: 1500000 },
+    { id: 4, customer: 'Phạm Thị D', date: '2025-08-04', status: 'Pending', total: 800000 },
+    { id: 5, customer: 'Hoàng Văn E', date: '2025-08-05', status: 'Confirmed', total: 2500000 },
+    { id: 6, customer: 'Ngô Thị F', date: '2025-08-06', status: 'Cancelled', total: 1200000 },
+    { id: 7, customer: 'Đinh Văn G', date: '2025-08-07', status: 'Delivered', total: 1800000 },
+    { id: 8, customer: 'Bùi Thị H', date: '2025-08-08', status: 'Pending', total: 900000 },
+    { id: 9, customer: 'Vũ Văn I', date: '2025-08-09', status: 'Confirmed', total: 3000000 },
+    { id: 10, customer: 'Trương Thị K', date: '2025-08-10', status: 'Delivered', total: 2200000 },
   ];
 
   return (

@@ -16,6 +16,7 @@ import OrderList from './components/orders/OrderList';
 import OrderDetail from './components/orders/OrderDetail';
 import InventoryList from './components/inventory/InventoryList';
 import ReportList from './components/reports/ReportList';
+import ReportDetail from './components/reports/ReportDetail';
 
 function App() {
   return (
@@ -35,6 +36,7 @@ function App() {
             <Route path="/admin/orders/:id" element={<OrderDetail />} />
             <Route path="/admin/inventory" element={<InventoryList />} />
             <Route path="/admin/reports" element={<ReportList />} />
+            <Route path="/admin/reports/:id" element={<ReportDetail />} />
           </Route>
         </Route>
         <Route element={<ProtectRouter allowedRoles={['Supplier']} />}>
