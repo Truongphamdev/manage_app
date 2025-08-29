@@ -1,10 +1,9 @@
 from django.urls import path
-
-
-
-from .views import RegisterView, LoginView,UserManagementViewSet,ManageProductViewSet,\
-ReportViewSet,ReportRevennueViewSet,ProsalProductViewSet,ProsalProductAdminViewSet,OrderDetailViewSet,\
-HistoryStockViewSet,CategoryViewSet,CartViewSet
+from .views import (
+    RegisterView, LoginView, UserManagementViewSet, ManageProductViewSet,
+    ReportViewSet, ReportRevenueViewSet, ProposalProductAdminViewSet, ProposalProductViewSet,
+    OrderDetailViewSet, HistoryStockViewSet, CategoryViewSet, CartViewSet
+)
 from rest_framework_simplejwt.views import TokenRefreshView
 
 urlpatterns = [
@@ -12,40 +11,43 @@ urlpatterns = [
     path('login/', LoginView.as_view(), name='login'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
 
-    # admin
-    # admin_user
-    path('admin/users', UserManagementViewSet.as_view({'get': 'list_users'})),
-    path('admin/users/<int:pk>/', UserManagementViewSet.as_view({'get': 'detail_user'})),
-    path('admin/users/<int:pk>/block', UserManagementViewSet.as_view({'put': 'block_user'})),
-    path('admin/users/<int:pk>/unblock', UserManagementViewSet.as_view({'put': 'unblock_user'})),
-    path('admin/users/<int:pk>/', UserManagementViewSet.as_view({'delete': 'destroy'})),
-    # admin_product
-    path('admin/products',ManageProductViewSet.as_view({'get':'list'})),
-    path('admin/products/<int:pk>/',ManageProductViewSet.as_view({'get':'retrieve'})),
-    path('admin/products/form-data/',ManageProductViewSet.as_view({'get':'form_data'})),
-    path('admin/products/',ManageProductViewSet.as_view({'post':'create'})),
-    path('admin/products/<int:pk>/',ManageProductViewSet.as_view({'put':'update'})),
-    path('admin/products/<int:pk>/',ManageProductViewSet.as_view({'delete':'destroy'})),
-    # admin_report
-    path('admin/report/<int:product_id>/<str:start_date>/<str:end_date>/', ReportViewSet.as_view({'get':'list'}), name='stock-report'),
-    path('admin/report/revenue/<str:start_date>/<str:end_date>/', ReportRevennueViewSet.as_view({'get':'list'}), name='revenue-report'),
-    path('reports/stock/export/<int:product_id>/<str:start_date>/<str:end_date>/', 
-     ReportViewSet.as_view({'get': 'export_report'}), name='stock-report-export'),
-    path('reports/revenue/export/<str:start_date>/<str:end_date>/', 
-     ReportRevennueViewSet.as_view({'get': 'export_report'}), name='revenue-report-export'),
-    #  admin prosal
-    path('admin/prosal/<int:pk>/', ProsalProductAdminViewSet.as_view({'put': 'prosal_admin'}), name='prosal-admin'),
-    # admincategory
+    # Admin user management
+    path('admin/users/', UserManagementViewSet.as_view({'get': 'list_users', 'post': 'create'})),
+    path('admin/users/<int:pk>/', UserManagementViewSet.as_view({
+        'get': 'detail_user',
+        'put': 'update',
+        'delete': 'destroy'
+    })),
+    path('admin/users/<int:pk>/block/', UserManagementViewSet.as_view({'put': 'block_user'})),
+    path('admin/users/<int:pk>/unblock/', UserManagementViewSet.as_view({'put': 'unblock_user'})),
+
+    # Admin product management
+    path('admin/products/', ManageProductViewSet.as_view({'get':'list', 'post':'create'})),
+    path('admin/products/<int:pk>/', ManageProductViewSet.as_view({'get':'retrieve', 'put':'update', 'delete':'destroy'})),
+    path('admin/products/form-data/', ManageProductViewSet.as_view({'get':'form_data'})),
+
+    # Admin report
+    path('admin/report/', ReportViewSet.as_view({'get':'list'}), name='stock-report'),
+    path('admin/report/export/', ReportViewSet.as_view({'get':'export_report'}), name='stock-report-export'),
+    path('admin/report/revenue/', ReportRevenueViewSet.as_view({'get':'list'}), name='revenue-report'),
+    path('admin/report/revenue/export/', ReportRevenueViewSet.as_view({'get':'export_report'}), name='revenue-report-export'),
+
+    # Admin proposal
+    path('admin/proposal/<int:pk>/', ProposalProductAdminViewSet.as_view({'patch': 'partial_update'}), name='proposal-admin'),
+
+    # Admin category
     path('admin/categories/', CategoryViewSet.as_view({'post': 'create'}), name='add-category'),
-    path('admin/categories/<int:pk>/', CategoryViewSet.as_view({'put': 'update'}), name='update-category'),
-    path('admin/categories/<int:pk>/', CategoryViewSet.as_view({'delete': 'delete'}), name='delete-category'),
-    #  supplier
-    path('supplier/prosal/', ProsalProductViewSet.as_view({'post': 'create_prosal'}), name='create-prosal'),
+    path('admin/categories/<int:pk>/', CategoryViewSet.as_view({'put': 'update', 'delete': 'destroy'}), name='update-delete-category'),
+
+    # Supplier proposal
+    path('supplier/proposal/', ProposalProductViewSet.as_view({'post': 'create'}), name='create-proposal'),
+
+    # Supplier order/history
     path('supplier/orders/', OrderDetailViewSet.as_view({'get': 'list'}), name='list-orders'),
     path('supplier/orders/<int:pk>/', OrderDetailViewSet.as_view({'get': 'retrieve'}), name='retrieve-order'),
     path('supplier/history-stock/', HistoryStockViewSet.as_view({'get': 'list'}), name='list-history-stock'),
-    path('supplier/history-stock/<int:pk>/', HistoryStockViewSet.as_view({'get': 'retrieve'}), name='retrieve-history-stock'),
-    # customer
+
+    # Customer cart
     path('customer/cart/', CartViewSet.as_view({'get': 'list'}), name='cart-list'),
     path('customer/cart/add/', CartViewSet.as_view({'post': 'add_to_cart'}), name='cart-add'),
     path('customer/cart/remove/<int:pk>/', CartViewSet.as_view({'delete': 'remove_cartitem'}), name='cart-remove'),
