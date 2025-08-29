@@ -5,7 +5,7 @@ const CustomerDashboard = () => {
   return (
     <div>
       <h1 className="text-3xl font-bold mb-6">Sản phẩm</h1>
-      <ProductList />
+      <h1>Hello word</h1>
     </div>
   );
 };
