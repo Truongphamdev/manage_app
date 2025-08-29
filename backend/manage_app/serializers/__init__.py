@@ -1,5 +1,5 @@
 from .auth_serializer import UserRegistrationSerializer, UserLoginSerializer, SupplierSerializer,\
-CustomerSerializer,UserUpdateSerializer,ChangePasswordSerializer,UserSerializer
+CustomerSerializer,UserUpdateSerializer,ChangePasswordSerializer,UserSerializer,SupplierCreateSerializer
 
 # admin
 from .admin.manage_serializer import CustomerSupplierUserSerializer,ProductSerializer,CreateProductSerializer,CategorySerializer,UpdateProductSerializer

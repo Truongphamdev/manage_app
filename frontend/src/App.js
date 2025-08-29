@@ -15,13 +15,13 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/" element={<HomePage />} />
-        <Route element={<ProtectRouter allowedRoles={['Admin']} />}>
+        <Route element={<ProtectRouter allowedRoles={['admin']} />}>
           <Route path="/admin" element={<AdminPage />} />
         </Route>
-        <Route element={<ProtectRouter allowedRoles={['Supplier']} />}>
+        <Route element={<ProtectRouter allowedRoles={['supplier']} />}>
           <Route path="/supplier" element={<SupplierPage />} />
         </Route>
-        <Route element={<ProtectRouter allowedRoles={['Customer']} />}>
+        <Route element={<ProtectRouter allowedRoles={['customer']} />}>
           <Route path="/customer" element={<CustomerPage />} />
         </Route>
       </Routes>

@@ -4,15 +4,15 @@ from django.contrib.auth.models import AbstractUser
 class User(AbstractUser):
     ROLE_CHOICES = (
         ("admin", "Admin"),
-        ("user", "User"),
+        ("customer", "Customer"),
         ("supplier", "Supplier")
     )
-    role = models.CharField(max_length=10,choices=ROLE_CHOICES,default="user")
+    role = models.CharField(max_length=10,choices=ROLE_CHOICES,default="customer")
     is_block = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     def __str__(self):
-        return self.full_name
+        return self.username
 
 # bảng Supplier
 class Supplier(models.Model):

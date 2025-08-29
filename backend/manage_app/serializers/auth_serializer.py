@@ -1,10 +1,10 @@
 from rest_framework import serializers
 from ..models import User, Supplier, Customer
+from django.db import transaction
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(required=True)
     password = serializers.CharField(write_only=True, required=True)
-    role = serializers.ChoiceField(choices=User.ROLE_CHOICES, required=True)
 
     full_name = serializers.CharField(required=True)
     address = serializers.CharField(required=False, allow_blank=True)
@@ -12,7 +12,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['email', 'password', 'role', 'full_name', 'address', 'phone']
+        fields = ['email', 'password', 'full_name', 'address', 'phone']
         extra_kwargs = {'password': {'write_only': True}}
 
     def validate_email(self, value):
@@ -26,36 +26,29 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         if len(value) > 20:
             raise serializers.ValidationError("Mật khẩu không được vượt quá 20 ký tự")
         return value
-
+    @transaction.atomic
     def create(self, validated_data):
-        role = validated_data.pop('role')
         password = validated_data.pop('password')
         full_name = validated_data.pop('full_name')
         address = validated_data.pop('address', '')
         phone = validated_data.pop('phone', '')
         email = validated_data.pop('email')
 
-        user = User.objects.create_user(
-            username=email,
+        try:
+            user = User.objects.create_user(
+            username=full_name,
             email=email,
             password=password,
-            role=role,
+            role='customer',
         )
-        # Tùy hệ thống bạn định nghĩa 'role'
-        if role == "supplier":
-            Supplier.objects.create(
-                user=user,
-                full_name=full_name,
-                address=address,
-                phone=phone
-            )
-        elif role == "customer":
             Customer.objects.create(
                 user=user,
                 full_name=full_name,
                 address=address,
                 phone=phone
             )
+        except Exception as e:
+            raise serializers.ValidationError("Đã xảy ra lỗi khi tạo người dùng")
         return user
 
 class UserLoginSerializer(serializers.Serializer):
@@ -77,12 +70,12 @@ class UserLoginSerializer(serializers.Serializer):
 class CustomerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Customer
-        fields = ['id', 'user', 'full_name', 'address', 'phone']
+        fields = [ 'user', 'full_name', 'address', 'phone']
 
 class SupplierSerializer(serializers.ModelSerializer):
     class Meta:
         model = Supplier
-        fields = ['id', 'user', 'full_name', 'address', 'phone']
+        fields = [ 'user', 'full_name', 'address', 'phone']
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
@@ -149,3 +142,41 @@ class ChangePasswordSerializer(serializers.Serializer):
         user.set_password(self.validated_data['new_password'])
         user.save()
         return user
+
+# thêm supplier
+class SupplierCreateSerializer(serializers.ModelSerializer):
+    email = serializers.EmailField(required=True)
+    password = serializers.CharField(write_only=True, required=True)
+    full_name = serializers.CharField(required=True)
+    address = serializers.CharField(required=False, allow_blank=True)
+    phone = serializers.CharField(required=False, allow_blank=True)
+
+    class Meta:
+        model = User
+        fields = ['email', 'password', 'full_name', 'address', 'phone']
+    def validate_email(self, value):
+        if User.objects.filter(email=value).exists():
+            raise serializers.ValidationError("Email đã tồn tại")
+        return value
+
+    def validate_password(self, value):
+        if len(value) < 8:
+            raise serializers.ValidationError("Mật khẩu phải có ít nhất 8 ký tự")
+        if len(value) > 20:
+            raise serializers.ValidationError("Mật khẩu không được vượt quá 20 ký tự")
+        return value
+    @transaction.atomic
+    def create(self, validated_data):
+        user = User.objects.create_user(
+            email=validated_data['email'],
+            password=validated_data['password'],
+            username=validated_data['full_name'],
+            role='supplier'
+        )
+        Supplier.objects.create(
+            user=user,
+            full_name=validated_data['full_name'],
+            address=validated_data['address'],
+            phone=validated_data['phone']
+        )
+        return user 

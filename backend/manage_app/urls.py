@@ -2,7 +2,7 @@ from django.urls import path
 from .views import (
     RegisterView, LoginView, UserManagementViewSet, ManageProductViewSet,
     ReportViewSet, ReportRevenueViewSet, ProposalProductAdminViewSet, ProposalProductViewSet,
-    OrderDetailViewSet, HistoryStockViewSet, CategoryViewSet, CartViewSet
+    OrderDetailViewSet, HistoryStockViewSet, CategoryViewSet, CartViewSet, SupplierCreateViewSet
 )
 from rest_framework_simplejwt.views import TokenRefreshView
 
@@ -20,6 +20,7 @@ urlpatterns = [
     })),
     path('admin/users/<int:pk>/block/', UserManagementViewSet.as_view({'put': 'block_user'})),
     path('admin/users/<int:pk>/unblock/', UserManagementViewSet.as_view({'put': 'unblock_user'})),
+    path('admin/suppliers/', SupplierCreateViewSet.as_view({'post': 'create'}), name='create-supplier'),
 
     # Admin product management
     path('admin/products/', ManageProductViewSet.as_view({'get':'list', 'post':'create'})),
