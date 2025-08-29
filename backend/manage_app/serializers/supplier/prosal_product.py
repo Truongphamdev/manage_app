@@ -1,11 +1,11 @@
 from rest_framework import serializers
 from ...models import Product, ProductProposals
 
-class ProsalProductSerializer(serializers.ModelSerializer):
+class ProposalProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductProposals
         fields = '__all__'
-        read_only_fields = ['id', 'created_at']
+        read_only_fields = ['id', 'created_at', 'supplier']
 
     def validate_proposed_price(self, value):
         if value <= 0:
@@ -26,24 +26,21 @@ class ProsalProductSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         request = self.context.get('request')
         user = request.user
-        supplier = user.supplier
-        validated_data['supplier'] = supplier
-        product_id = validated_data['product'].id
-        product = Product.objects.filter(id=product_id).first()
-        if not product:
-            raise serializers.ValidationError("Product not found.")
-        validated_data['product'] = product
-        return ProductProposals.objects.create(product=product, supplier=supplier, **validated_data)
-    
+        if not hasattr(user, 'supplier'):
+            raise serializers.ValidationError("User must be a supplier.")
+        validated_data['supplier'] = user.supplier
+        product = validated_data.get('product')
+        if not isinstance(product, Product):
+            raise serializers.ValidationError("Product is invalid.")
+        return ProductProposals.objects.create(**validated_data)
 
-# admin
-class ProsalProductAdminSerializer(serializers.ModelSerializer):
+class ProposalProductAdminSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductProposals
-        fields = 'status'
+        fields = ('status',)
 
     def validate_status(self, value):
-        value_valid = ["approved","rejected"]
+        value_valid = ["approved", "rejected"]
         if value not in value_valid:
             raise serializers.ValidationError(f"Status must be one of: {', '.join(value_valid)}.")
         return value
