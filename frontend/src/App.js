@@ -7,6 +7,7 @@ import AdminPage from './pages/AdminPage';
 import SupplierPage from './pages/SupplierPage';
 import CustomerPage from './pages/CustomerPage';
 import HomePage from './pages/HomePage';
+
 import AdminLayout from './components/layouts/AdminLayout';
 import UserList from './components/users/UserList';
 import UserDetail from './components/users/UserDetail';
@@ -17,14 +18,18 @@ import OrderDetail from './components/orders/OrderDetail';
 import InventoryList from './components/inventory/InventoryList';
 import ReportList from './components/reports/ReportList';
 import ReportDetail from './components/reports/ReportDetail';
+import { UserProvider } from './api/context/UserContext';
+
 
 function App() {
   return (
+    <UserProvider>
     <Router>
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/" element={<HomePage />} />
+
         <Route element={<ProtectRouter allowedRoles={['Admin']} />}>
           <Route element={<AdminLayout />}>
             <Route path="/admin" element={<AdminPage />} />
@@ -38,15 +43,20 @@ function App() {
             <Route path="/admin/reports" element={<ReportList />} />
             <Route path="/admin/reports/:id" element={<ReportDetail />} />
           </Route>
+
+        <Route element={<ProtectRouter allowedRoles={['admin']} />}>
+          <Route path="/admin" element={<AdminPage />} />
+
         </Route>
-        <Route element={<ProtectRouter allowedRoles={['Supplier']} />}>
+        <Route element={<ProtectRouter allowedRoles={['supplier']} />}>
           <Route path="/supplier" element={<SupplierPage />} />
         </Route>
-        <Route element={<ProtectRouter allowedRoles={['Customer']} />}>
+        <Route element={<ProtectRouter allowedRoles={['customer']} />}>
           <Route path="/customer" element={<CustomerPage />} />
         </Route>
       </Routes>
     </Router>
+        </UserProvider>
   );
 }
 

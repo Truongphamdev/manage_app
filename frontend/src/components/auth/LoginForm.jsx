@@ -1,17 +1,41 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-
+import All_Api from '../../api/AllApi';
+import { useUser } from '../../api/context/UserContext';
 const LoginForm = () => {
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [errors, setErrors] = useState('');
   const navigate = useNavigate();
-
-  const handleSubmit = (e) => {
+  const [rememberMe, setRememberMe] = useState(false);
+  const { setUser } = useUser();
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Giả sử gọi API đăng nhập ở đây, lưu token và role vào localStorage
-    localStorage.setItem('access', 'sample_token');
-    localStorage.setItem('role', 'Customer'); // Thay bằng role thực tế từ API
-    navigate('/customer');
+    try {
+      const response = await All_Api.login({ email, password });
+    if (rememberMe) {
+      localStorage.setItem('access', response.access);
+      localStorage.setItem('refresh', response.refresh);
+      localStorage.setItem('user', JSON.stringify(response.user));
+    } else {
+      sessionStorage.setItem('access', response.access);
+      sessionStorage.setItem('refresh', response.refresh);
+      sessionStorage.setItem('user', JSON.stringify(response.user));
+    }
+    setUser(response.user);
+    if(response.user.role === 'admin'){
+      navigate('/admin');
+    } else if(response.user.role === 'supplier'){
+      navigate('/supplier');
+    } else if(response.user.role === 'customer'){
+      navigate('/customer');
+    }
+    window.alert("Đăng nhập thành công");
+    console.log(response);
+    
+    } catch (error) {
+      setErrors(error.response.data);
+    }
   };
 
   return (
@@ -19,14 +43,15 @@ const LoginForm = () => {
       <h2 className="text-2xl font-bold text-center mb-6">Đăng nhập</h2>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700">Tên đăng nhập</label>
+          <label className="block text-sm font-medium text-gray-700">Email</label>
           <input
             type="text"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
             className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
             required
           />
+          {errors.email && <p className="text-red-500 text-sm">{errors.email[0]}</p>}
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700">Mật khẩu</label>
@@ -37,11 +62,14 @@ const LoginForm = () => {
             className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
             required
           />
+          {errors.password && <p className="text-red-500 text-sm">{errors.password[0]}</p>}
         </div>
         <div className="flex items-center justify-between">
           <div className="flex items-center">
             <input
               type="checkbox"
+              checked={rememberMe}
+              onChange={(e) => setRememberMe(e.target.checked)}
               className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
             />
             <label className="ml-2 block text-sm text-gray-900">Ghi nhớ đăng nhập</label>

@@ -1,44 +1,48 @@
 from rest_framework import viewsets, status
+from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.http import HttpResponse
-import csv
-from permissions import IsAdminRole
-from models import StockMovement, Product
-from serializers import StockReportSerializer,ReportRevennueSerializer
-from rest_framework.views import APIView
+from ...permissions import IsAdminRole
+from ...models import Product
+from ...serializers import StockReportSerializer, ReportRevenueSerializer
 from openpyxl import Workbook
 from openpyxl.styles import Font, Alignment, PatternFill
 
-
-class ReportViewSet(APIView):
+class ReportViewSet(viewsets.ViewSet):
     permission_classes = [IsAdminRole]
-    def get(self, request, product_id, start_date, end_date):
+
+    def list(self, request):
+        product_id = request.query_params.get('product_id')
+        start_date = request.query_params.get('start_date')
+        end_date = request.query_params.get('end_date')
         if not product_id or not start_date or not end_date:
             return Response({"error": "Vui lòng cung cấp product_id, start_date và end_date"}, status=status.HTTP_400_BAD_REQUEST)
-        if product_id:
-            product_name = Product.objects.filter(id=product_id).first()
-            if not product_name:
-                return Response({"error": "Product not found"}, status=404)
+        product = Product.objects.filter(pk=product_id).first()
+        if not product:
+            return Response({"error": "Product not found"}, status=404)
         data = {
-            "product_id": product_id,
-            "product_name": product_name.name,
+            "product_id": int(product_id),
             "start_date": start_date,
             "end_date": end_date
         }
-        serializer = StockReportSerializer(data,many=False)
+        serializer = StockReportSerializer(data)
         return Response(serializer.data)
-    def export_report(self,request, product_id, start_date, end_date):
-        if product_id:
-            product_name = Product.objects.filter(id=product_id).first()
-            if not product_name:
-                return Response({"error": "Product not found"}, status=404)
+
+    @action(detail=False, methods=['get'])
+    def export_report(self, request):
+        product_id = request.query_params.get('product_id')
+        start_date = request.query_params.get('start_date')
+        end_date = request.query_params.get('end_date')
+        if not product_id or not start_date or not end_date:
+            return Response({"error": "Vui lòng cung cấp product_id, start_date và end_date"}, status=status.HTTP_400_BAD_REQUEST)
+        product = Product.objects.filter(pk=product_id).first()
+        if not product:
+            return Response({"error": "Product not found"}, status=404)
         data = {
-            "product_id": product_id,
-            "product_name": product_name.name,
+            "product_id": int(product_id),
             "start_date": start_date,
             "end_date": end_date
         }
-        
         serializer = StockReportSerializer(data)
         # Tạo workbook và sheet
         wb = Workbook()
@@ -47,7 +51,7 @@ class ReportViewSet(APIView):
 
         # Header
         headers = ['Product ID', 'Product Name', 'Start Date', 'End Date', 
-                'Beginning Inventory', 'Imports', 'Exports', 'Ending']
+                   'Beginning Inventory', 'Imports', 'Exports', 'Ending']
         header_font = Font(bold=True, color="FFFFFF")
         header_fill = PatternFill("solid", fgColor="4F81BD")
 
@@ -81,26 +85,32 @@ class ReportViewSet(APIView):
         wb.save(response)
         return response
 
-# báo cáo doanh thu
-class ReportRevennueViewSet(APIView):
+class ReportRevenueViewSet(viewsets.ViewSet):
     permission_classes = [IsAdminRole]
-    def get(self, request, start_date, end_date):
+
+    def list(self, request):
+        start_date = request.query_params.get('start_date')
+        end_date = request.query_params.get('end_date')
         if not start_date or not end_date:
             return Response({"error": "Vui lòng cung cấp start_date và end_date"}, status=status.HTTP_400_BAD_REQUEST)
-
         data = {
             "start_date": start_date,
             "end_date": end_date
         }
-        serializer = ReportRevennueSerializer(data)
+        serializer = ReportRevenueSerializer(data)
         return Response(serializer.data)
-    def export_report(self,request, start_date, end_date):
+
+    @action(detail=False, methods=['get'])
+    def export_report(self, request):
+        start_date = request.query_params.get('start_date')
+        end_date = request.query_params.get('end_date')
+        if not start_date or not end_date:
+            return Response({"error": "Vui lòng cung cấp start_date và end_date"}, status=status.HTTP_400_BAD_REQUEST)
         data = {
             "start_date": start_date,
             "end_date": end_date
         }
-
-        serializer = ReportRevennueSerializer(data)
+        serializer = ReportRevenueSerializer(data)
         # Tạo workbook và sheet
         wb = Workbook()
         ws = wb.active
@@ -131,7 +141,7 @@ class ReportRevennueViewSet(APIView):
         # Response
         response = HttpResponse(
             content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-            headers={'Content-Disposition': f'attachment; filename=revenue_report.xlsx'}
+            headers={'Content-Disposition': 'attachment; filename=revenue_report.xlsx'}
         )
         wb.save(response)
         return response

@@ -1,55 +1,68 @@
 from rest_framework import viewsets, status
+from rest_framework.decorators import action
 from rest_framework.response import Response
-from permissions import IsAdminRole
-from models import User,Customer,Supplier
-from serializers import CustomerSupplierUserSerializer
+from ...permissions import IsAdminRole
+from ...models import User, Customer, Supplier
+from ...serializers import UserSerializer, CustomerSerializer, SupplierSerializer,SupplierCreateSerializer
 from django.shortcuts import get_object_or_404
 
 class UserManagementViewSet(viewsets.ViewSet):
     permission_classes = [IsAdminRole]
-    def list_users(self, request):
-        users = User.objects.all()
-        customer = Customer.objects.all()
-        supplier = Supplier.objects.all()
+
+    def list(self, request):
+        customers = Customer.objects.all()
+        suppliers = Supplier.objects.all()
+        return Response({
+            "customers": CustomerSerializer(customers, many=True).data,
+            "suppliers": SupplierSerializer(suppliers, many=True).data,
+        })
+
+    def retrieve(self, request, pk=None):
+        user = get_object_or_404(User, pk=pk)
         data = {
-            'customer': customer,
-            'supplier': supplier,
-            'user': users
+            "user": UserSerializer(user).data
         }
-        serializer = CustomerSupplierUserSerializer(data,many=True)
-        return Response(serializer.data)
-    def detail_user(self, request, pk=None):
+        if user.role == "customer":
+            customer = Customer.objects.filter(user=user).first()
+            data["customer"] = CustomerSerializer(customer).data if customer else None
+        elif user.role == "supplier":
+            supplier = Supplier.objects.filter(user=user).first()
+            data["supplier"] = SupplierSerializer(supplier).data if supplier else None
+        return Response(data)
+
+    @action(detail=True, methods=["post"])
+    def block(self, request, pk=None):
         user = get_object_or_404(User, pk=pk)
-        customer = Customer.objects.filter(user=user).first() if user.role == "customer" else None
-        supplier = Supplier.objects.filter(user=user).first() if user.role == "supplier" else None
-        if user:
-            serializer = CustomerSupplierUserSerializer({
-                'user': user,
-                'customer': customer,
-                'supplier': supplier
-            })
-            return Response(serializer.data)
-        return Response({"error": "không tìm thấy người dùng"}, status=status.HTTP_404_NOT_FOUND)
-    def block_user(self,request,pk=None):
+        user.is_block = True
+        user.save()
+        return Response({"status": "người dùng đã bị chặn"}, status=status.HTTP_200_OK)
+
+    @action(detail=True, methods=["post"])
+    def unblock(self, request, pk=None):
         user = get_object_or_404(User, pk=pk)
-        if user:
-            user.is_block = True
-            user.save()
-            return Response({"status": "người dùng đã bị chặn"}, status=status.HTTP_200_OK)
-        return Response({"error": "không tìm thấy người dùng"}, status=status.HTTP_404_NOT_FOUND)
-    def unblock_user(self,request,pk =None):
-        user = get_object_or_404(User, pk=pk)
-        if user:
-            user.is_block = False
-            user.save()
-            return Response({"status": "người dùng đã được bỏ chặn"}, status=status.HTTP_200_OK)
-        return Response({"error": "không tìm thấy người dùng"}, status=status.HTTP_404_NOT_FOUND)
-    def destroy(self,request,pk=None):
+        user.is_block = False
+        user.save()
+        return Response({"status": "người dùng đã được bỏ chặn"}, status=status.HTTP_200_OK)
+    
+    def destroy(self, request, pk=None):
         user = get_object_or_404(User, pk=pk)
         if user.role == "admin":
             return Response({"error": "không thể xóa người dùng admin"}, status=status.HTTP_400_BAD_REQUEST)
-        if user:
-            user.delete()
-            return Response({"status": "người dùng đã bị xóa"}, status=status.HTTP_200_OK)
-        return Response({"error": "không tìm thấy người dùng"}, status=status.HTTP_404_NOT_FOUND)
+        user.delete()
+        return Response({"status": "người dùng đã bị xóa"}, status=status.HTTP_200_OK)
     
+class SupplierCreateViewSet(viewsets.ViewSet):
+    permission_classes = [IsAdminRole]
+
+    def create(self, request):
+        serializer = SupplierCreateSerializer(data=request.data)
+        if serializer.is_valid():
+            user = serializer.save()
+            return Response(
+                {
+                    "status": "nhà cung cấp đã được tạo",
+                    "user": UserSerializer(user).data
+                },
+                status=status.HTTP_201_CREATED
+            )
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
