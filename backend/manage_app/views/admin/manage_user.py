@@ -12,10 +12,29 @@ class UserManagementViewSet(viewsets.ViewSet):
     def list(self, request):
         customers = Customer.objects.all()
         suppliers = Supplier.objects.all()
+        admins = User.objects.filter(role='admin')
         return Response({
             "customers": CustomerSerializer(customers, many=True).data,
             "suppliers": SupplierSerializer(suppliers, many=True).data,
+            "admins": UserSerializer(admins, many=True).data,
         })
+    
+    def update(self, request, pk=None):
+        user = get_object_or_404(User, pk=pk)
+        customer = Customer.objects.filter(user=user).first()
+        supplier = Supplier.objects.filter(user=user).first()
+        if user.role == "customer" and customer:
+            serializer = CustomerSerializer(customer, data=request.data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                return Response({"status": "Thông tin khách hàng đã được cập nhật"}, status=status.HTTP_200_OK)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        elif user.role == "supplier" and supplier:
+            serializer = SupplierSerializer(supplier, data=request.data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                return Response({"status": "Thông tin nhà cung cấp đã được cập nhật"}, status=status.HTTP_200_OK)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def retrieve(self, request, pk=None):
         user = get_object_or_404(User, pk=pk)

@@ -21,6 +21,7 @@ class Supplier(models.Model):
     full_name = models.CharField(max_length=100)
     address = models.CharField(max_length=255, blank=True, null=True)
     phone = models.CharField(max_length=15, blank=True, null=True)
+    company_name = models.CharField(max_length=100, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
