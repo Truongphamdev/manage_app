@@ -5,7 +5,8 @@ const All_Api = {
     login:(data)=>axiosClient.post('/login/', data),
     // admin
     getUsers: () => axiosClient.get('/admin/users/'),
-    getUser: (id) => axiosClient.get(`/admin/users/${id}/`),
+    updateUser: (id, data) => axiosClient.put(`/admin/users/${id}/`, data),
+    getUserById: (id) => axiosClient.get(`/admin/users/${id}/`),
     deleteUser: (id) => axiosClient.delete(`/admin/users/${id}/`),
 }
 export default All_Api;
