@@ -26,6 +26,7 @@ class ManageProductViewSet(viewsets.ViewSet):
         return Response({"suppliers": suppliers, "categories": categories})
 
     def create(self, request):
+        print("create validated_data:", request.data)
         serializer = CreateProductSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()

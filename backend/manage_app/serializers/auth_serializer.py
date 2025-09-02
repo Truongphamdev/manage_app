@@ -69,11 +69,12 @@ class UserLoginSerializer(serializers.Serializer):
 
 class CustomerSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(source='user.email')
+    is_block = serializers.BooleanField(source='user.is_block', read_only=True)
 
     class Meta:
         model = Customer
-        fields = ['CustomerID', 'user', 'full_name', 'address', 'phone', 'email']
-        read_only_fields = ['CustomerID']
+        fields = ['CustomerID', 'user', 'full_name', 'address', 'phone', 'email', 'is_block']
+        read_only_fields = ['CustomerID', 'is_block']
 
     def validate_email(self, value):
         User = get_user_model()
@@ -102,10 +103,12 @@ class CustomerSerializer(serializers.ModelSerializer):
 
 class SupplierSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(source='user.email')
+    is_block = serializers.BooleanField(source='user.is_block', read_only=True)
 
     class Meta:
         model = Supplier
-        fields = ['SupplierID', 'user', 'full_name', 'address', 'phone', 'company_name', 'email']
+        fields = ['SupplierID', 'user', 'full_name', 'address', 'phone', 'company_name', 'email', 'is_block']
+        read_only_fields = ['SupplierID', 'is_block']
 
     def validate_email(self, value):
         User = get_user_model()
