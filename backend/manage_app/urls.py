@@ -18,9 +18,9 @@ urlpatterns = [
         'get': 'retrieve',
         'delete': 'destroy'
     })),
-    path('admin/users/<int:pk>/block/', UserManagementViewSet.as_view({'put': 'block_user'})),
-    path('admin/users/<int:pk>/unblock/', UserManagementViewSet.as_view({'put': 'unblock_user'})),
-    path('admin/suppliers/', SupplierCreateViewSet.as_view({'post': 'create'}), name='create-supplier'),
+    path('admin/users/<int:pk>/block/', UserManagementViewSet.as_view({'post': 'block'})),
+    path('admin/users/<int:pk>/unblock/', UserManagementViewSet.as_view({'post': 'unblock'})),
+    path('admin/supplier/', SupplierCreateViewSet.as_view({'post': 'create'}), name='create-supplier'),
 
     # Admin product management
     path('admin/products/', ManageProductViewSet.as_view({'get':'list', 'post':'create'})),

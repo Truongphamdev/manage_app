@@ -8,9 +8,33 @@ const UserList = () => {
   const [admin, setAdmin] = useState([]);
   const [editUser, setEditUser] = useState(null);       
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showAddModal, setShowAddModal] = useState(false);
   const [error, setError] = useState(null);
   const navigate = useNavigate()
-  useEffect(() => { 
+    const [formData,setFormData] = useState({
+    full_name:'',
+    email: '',
+    password: '',
+    address:'',
+    phone:'',
+    company_name:'',
+  })
+  const initialFormData = {
+  full_name:'',
+  email: '',
+  password: '',
+  address: '',
+  phone: '',
+  company_name: '',
+};
+  const [passwordConfirm, setPasswordConfirm] = useState('');
+  const handleFormChange = (e) => {
+    setFormData({...formData,[e.target.name]: e.target.value})
+  }
+  const handlePasswordConfirmChange = (e) => {
+    setPasswordConfirm(e.target.value);
+  };
+  useEffect(() => {
     getUsers();
   }, []);
   const handleEdit = async(user) => {
@@ -77,80 +101,272 @@ const UserList = () => {
 const handleDetail = (id) => {
   navigate(`/admin/users/${id}`);
 }
-  return (
-    <div>
-      <h1 className="text-3xl font-bold mb-6">Quản lý người dùng</h1>
-      <div className="bg-white shadow-md rounded-lg overflow-hidden">
+// handle block
+const handleBlock = async(id)=> {
+  try {
+    const response = await All_Api.blockUser(id);
+    window.alert("Khóa người dùng thành công");
+    getUsers();
+  } catch (error) {
+    console.error("Error blocking user:", error);
+    window.alert("Khóa người dùng thất bại");
+  }
+}
+const handleUnblock = async(id)=> {
+  try {
+    const response = await All_Api.unblockUser(id);
+    window.alert("Mở khóa người dùng thành công");
+    getUsers();
+  } catch (error) {
+    console.error("Error unblocking user:", error);
+    window.alert("Mở khóa người dùng thất bại");
+  }
+}
+// add supplier
+const handleAddSupplier = async (e) => {
+   e.preventDefault();
+  if(formData.password !== passwordConfirm) {
+    setError("Mật khẩu xác nhận không khớp" );
+    return;
+  }
+  try {
+    const response = await All_Api.addSupplier(formData);
+    window.alert("Thêm supplier thành công");
+    setShowAddModal(false);
+    setFormData(initialFormData);
+    setPasswordConfirm(""); 
+    setError(null);
+    getUsers(); 
+  }
+  catch(error) {
+    console.error("Error adding supplier:", error);
+    setError(error?.response?.data);
+    window.alert("Thêm supplier thất bại");
+  }
+};
+  const TableHeader = ({ columns }) => (
+    <thead className="bg-gray-50 hidden sm:table-header-group">
+      <tr>
+        {columns.map((col) => (
+          <th
+            key={col}
+            className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+          >
+            {col}
+          </th>
+        ))}
+      </tr>
+    </thead>
+  );
+
+  // Helper: Responsive Table Row
+  const TableRow = ({ data, columns, actionButtons }) => (
+    <tr className="sm:table-row flex flex-col sm:flex-row mb-2 sm:mb-0 border-b sm:border-none">
+      {columns.map((col, idx) => (
+        <td
+          key={col}
+          className="px-4 py-2 sm:whitespace-nowrap text-sm flex-1 sm:table-cell flex items-center sm:block"
+        >
+          <span className="font-semibold block sm:hidden min-w-[100px]">{col}:</span>
+          {data[col]}
+        </td>
+      ))}
+      {actionButtons && (
+        <td className="flex flex-row gap-2 px-4 py-2 sm:table-cell">{actionButtons}</td>
+      )}
+    </tr>
+  );
+
+  // Column Definitions (for display and responsive)
+  const adminColumns = ["ID", "Họ tên", "Email"];
+  const supplierColumns = ["ID", "Họ tên", "Email"];
+  const customerColumns = ["ID", "Họ tên", "Email"];
+return (
+    <div className="p-2 sm:p-4 max-w-[900px] mx-auto">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-2 sm:mb-4 gap-2">
+        <h1 className="text-2xl sm:text-3xl font-bold">Quản lý người dùng</h1>
+        <button
+          onClick={() => setShowAddModal(true)}
+          className="bg-blue-500 text-white px-4 py-2 rounded w-full sm:w-auto"
+        >
+          Thêm Supplier
+        </button>
+      </div>
+
+      {/* Admin Table */}
+      <div className="bg-white shadow-md rounded-lg overflow-x-auto mb-4">
         <h3 className='text-lg font-semibold p-4'>Admin</h3>
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Họ tên</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
+        <table className="min-w-full table-auto">
+          <TableHeader columns={adminColumns} />
+          <tbody className="divide-y divide-gray-200">
             {admin.map((user) => (
-              <tr key={user.id}>
-                <td className="px-6 py-4 whitespace-nowrap">{user.id}</td>
-                <td className="px-6 py-4 whitespace-nowrap">{user.username || user.full_name}</td>
-                <td className="px-6 py-4 whitespace-nowrap">{user.email}</td>
-              </tr>
+              <TableRow
+                key={user.id}
+                data={{
+                  ID: user.id,
+                  "Họ tên": user.username || user.full_name,
+                  Email: user.email
+                }}
+                columns={adminColumns}
+              />
             ))}
           </tbody>
         </table>
       </div>
-      <div className="bg-white shadow-md rounded-lg overflow-hidden">
+
+      {/* Supplier Table */}
+      <div className="bg-white shadow-md rounded-lg overflow-x-auto mb-4">
         <h3 className='text-lg font-semibold p-4'>Supplier</h3>
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Họ tên</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Hành động</th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
+        <table className="min-w-full table-auto">
+          <TableHeader columns={[...supplierColumns, "Hành động"]} />
+          <tbody className="divide-y divide-gray-200">
             {supplier.map((user) => (
-              <tr key={user.SupplierID}>
-                <td className="px-6 py-4 whitespace-nowrap">{user.SupplierID}</td>
-                <td className="px-6 py-4 whitespace-nowrap">{user.full_name}</td>
-                <td className="px-6 py-4 whitespace-nowrap">{user.email}</td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <button onClick={() => handleEdit(user.user)} className="text-blue-600 hover:underline mr-4">Sửa</button>
-                  <button onClick={() => handleDelete(user.user)} className="text-red-600 hover:underline mr-4">Xóa</button>
-                  <button onClick={() => handleDetail(user.user)} className="text-red-600 hover:underline">Chi tiết</button>
-                </td>
-              </tr>
+              <TableRow
+                key={user.user}
+                data={{
+                  ID: user.SupplierID || user.id,
+                  "Họ tên": user.full_name,
+                  Email: user.email,
+                }}
+                columns={supplierColumns}
+                actionButtons={
+                  <div className="flex flex-wrap gap-2">
+                    <button
+                      onClick={() => handleEdit(user.user)}
+                      className="inline-flex items-center px-3 py-1.5 bg-blue-500 text-white rounded hover:bg-blue-600 shadow"
+                      title="Sửa"
+                    >
+                      <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536M9 13l6-6m2 2l-6 6m6-6v2a2 2 0 002 2h2" />
+                      </svg>
+                      Sửa
+                    </button>
+                    <button
+                      onClick={() => handleDelete(user.user)}
+                      className="inline-flex items-center px-3 py-1.5 bg-red-500 text-white rounded hover:bg-red-600 shadow"
+                      title="Xóa"
+                    >
+                      <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5-4h4a2 2 0 012 2v2H7V5a2 2 0 012-2z" />
+                      </svg>
+                      Xóa
+                    </button>
+                    <button
+                      onClick={() => handleDetail(user.user)}
+                      className="inline-flex items-center px-3 py-1.5 bg-gray-500 text-white rounded hover:bg-gray-600 shadow"
+                      title="Chi tiết"
+                    >
+                      <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                      </svg>
+                      Chi tiết
+                    </button>
+                    <button
+                      onClick={() => user.is_block ? handleUnblock(user.user) : handleBlock(user.user)}
+                      className={`inline-flex items-center px-3 py-1.5 rounded shadow 
+                        ${user.is_block ? 'bg-green-500 hover:bg-green-600' : 'bg-yellow-500 hover:bg-yellow-600'} text-white`}
+                      title={user.is_block ? "Mở khóa" : "Khóa"}
+                    >
+                      {user.is_block ? (
+                        <>
+                          <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4" />
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 20h.01" />
+                          </svg>
+                          Mở khóa
+                        </>
+                      ) : (
+                        <>
+                          <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M13.875 18.825A4 4 0 116.18 9.302m6.695 9.523A4 4 0 0017.82 9.302M15 7V5a3 3 0 10-6 0v2" />
+                          </svg>
+                          Khóa
+                        </>
+                      )}
+                    </button>
+                  </div>
+                }
+              />
             ))}
           </tbody>
         </table>
       </div>
-      <div className="bg-white shadow-md rounded-lg overflow-hidden">
+
+      {/* Customer Table */}
+      <div className="bg-white shadow-md rounded-lg overflow-x-auto mb-4">
         <h3 className='text-lg font-semibold p-4'>Customer</h3>
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Họ tên</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Hành động</th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
+        <table className="min-w-full table-auto">
+          <TableHeader columns={[...customerColumns, "Hành động"]} />
+          <tbody className="divide-y divide-gray-200">
             {customer.map((user) => (
-              <tr key={user.customer}>
-                <td className="px-6 py-4 whitespace-nowrap">{user.CustomerID}</td>
-                <td className="px-6 py-4 whitespace-nowrap">{user.full_name}</td>
-                <td className="px-6 py-4 whitespace-nowrap">{user.email}</td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <button onClick={() => handleEdit(user.user)} className="text-blue-600 hover:underline mr-4">Sửa</button>
-                  <button onClick={() => handleDelete(user.user)} className="text-red-600 hover:underline mr-4">Xóa</button>
-                  <button onClick={() => handleDetail(user.user)} className="text-red-600 hover:underline">Chi tiết</button>
-                </td>
-              </tr>
+              <TableRow
+                key={user.user}
+                data={{
+                  ID: user.CustomerID || user.id,
+                  "Họ tên": user.full_name,
+                  Email: user.email,
+                }}
+                columns={customerColumns}
+                actionButtons={
+                  <div className="flex flex-wrap gap-2">
+                    <button
+                      onClick={() => handleEdit(user.user)}
+                      className="inline-flex items-center px-3 py-1.5 bg-blue-500 text-white rounded hover:bg-blue-600 shadow"
+                      title="Sửa"
+                    >
+                      <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536M9 13l6-6m2 2l-6 6m6-6v2a2 2 0 002 2h2" />
+                      </svg>
+                      Sửa
+                    </button>
+                    <button
+                      onClick={() => handleDelete(user.user)}
+                      className="inline-flex items-center px-3 py-1.5 bg-red-500 text-white rounded hover:bg-red-600 shadow"
+                      title="Xóa"
+                    >
+                      <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5-4h4a2 2 0 012 2v2H7V5a2 2 0 012-2z" />
+                      </svg>
+                      Xóa
+                    </button>
+                    <button
+                      onClick={() => handleDetail(user.user)}
+                      className="inline-flex items-center px-3 py-1.5 bg-gray-500 text-white rounded hover:bg-gray-600 shadow"
+                      title="Chi tiết"
+                    >
+                      <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                      </svg>
+                      Chi tiết
+                    </button>
+                    <button
+                      onClick={() => user.is_block ? handleUnblock(user.user) : handleBlock(user.user)}
+                      className={`inline-flex items-center px-3 py-1.5 rounded shadow 
+                        ${user.is_block ? 'bg-green-500 hover:bg-green-600' : 'bg-yellow-500 hover:bg-yellow-600'} text-white`}
+                      title={user.is_block ? "Mở khóa" : "Khóa"}
+                    >
+                      {user.is_block ? (
+                        <>
+                          <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4" />
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 20h.01" />
+                          </svg>
+                          Mở khóa
+                        </>
+                      ) : (
+                        <>
+                          <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M13.875 18.825A4 4 0 116.18 9.302m6.695 9.523A4 4 0 0017.82 9.302M15 7V5a3 3 0 10-6 0v2" />
+                          </svg>
+                          Khóa
+                        </>
+                      )}
+                    </button>
+                  </div>
+                }
+              />
             ))}
           </tbody>
         </table>
@@ -323,9 +539,144 @@ const handleDetail = (id) => {
       </div>
     </div>
   </div>
+  
 )}
+      {/* Modal Thêm Supplier */}
+      {showAddModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 px-2">
+          <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-4 sm:p-6 relative">
+            <h2 className="text-xl sm:text-2xl font-bold mb-4 text-center text-blue-600">
+              Thêm nhà cung cấp
+            </h2>
+            <form className="space-y-4" onSubmit={handleAddSupplier}>
+              <div>
+                <label className="block font-medium mb-1">Họ tên</label>
+                <input
+                  required
+                  type="text"
+                  name="full_name"
+                  className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  value={formData.full_name}
+                  onChange={handleFormChange}
+                  placeholder="Họ tên"
+                />
+                {error?.full_name && (
+                  <p className="text-red-500 text-sm">{error.full_name[0]}</p>
+                )}
+              </div>
+              <div>
+                <label className="block font-medium mb-1">Email</label>
+                <input
+                  required
+                  type="email"
+                  name="email"
+                  className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  value={formData.email}
+                  onChange={handleFormChange}
+                  placeholder="Email"
+                />
+                {error?.email && (
+                  <p className="text-red-500 text-sm">{Array.isArray(error.email) ? error.email[0] : error.email}</p>
+                )}
+              </div>
+              <div>
+                <label className="block font-medium mb-1">Mật khẩu</label>
+                <input
+                  required
+                  type="password"
+                  name="password"
+                  className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  value={formData.password}
+                  onChange={handleFormChange}
+                  placeholder="Mật khẩu"
+                />
+                {error?.password && (
+                  <p className="text-red-500 text-sm">{error.password[0]}</p>
+                )}
+              </div>
+              <div>
+                <label className="block font-medium mb-1">Xác nhận mật khẩu</label>
+                <input
+                  required
+                  type="password"
+                  name="confirm_password"
+                  className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  value={passwordConfirm}
+                  onChange={handlePasswordConfirmChange}
+                  placeholder="Xác nhận mật khẩu"
+                />
+                {error?.confirm_password && (
+                  <p className="text-red-500 text-sm">{error.confirm_password}</p>
+                )}
+              </div>
+              <div>
+                <label className="block font-medium mb-1">Địa chỉ</label>
+                <input
+                  required
+                  type="text"
+                  name="address"
+                  className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  value={formData.address}
+                  onChange={handleFormChange}
+                  placeholder="Địa chỉ"
+                />
+                {error?.address && (
+                  <p className="text-red-500 text-sm">{error.address[0]}</p>
+                )}
+              </div>
+              <div>
+                <label className="block font-medium mb-1">Số điện thoại</label>
+                <input
+                  required
+                  type="text"
+                  name="phone"
+                  className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  value={formData.phone}
+                  onChange={handleFormChange}
+                  placeholder="Số điện thoại"
+                />
+                {error?.phone && (
+                  <p className="text-red-500 text-sm">{error.phone[0]}</p>
+                )}
+              </div>
+              <div>
+                <label className="block font-medium mb-1">Tên công ty</label>
+                <input
+                  required
+                  type="text"
+                  name="company_name"
+                  className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  value={formData.company_name}
+                  onChange={handleFormChange}
+                  placeholder="Tên công ty"
+                />
+                {error?.company_name && (
+                  <p className="text-red-500 text-sm">{error.company_name}</p>
+                )}
+              </div>
+              <div className="flex flex-col sm:flex-row justify-end mt-6 gap-2">
+                <button
+                  type="submit"
+                  className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+                >
+                  Thêm
+                </button>
+                <button
+                  type="button"
+                  className="bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300"
+                  onClick={() => setShowAddModal(false)}
+                >
+                  Đóng
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
+
+
 
 export default UserList;

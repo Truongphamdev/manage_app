@@ -49,14 +49,14 @@ class UserManagementViewSet(viewsets.ViewSet):
             data["supplier"] = SupplierSerializer(supplier).data if supplier else None
         return Response(data)
 
-    @action(detail=True, methods=["post"])
+    @action(detail=True, methods=['post'])
     def block(self, request, pk=None):
         user = get_object_or_404(User, pk=pk)
         user.is_block = True
         user.save()
         return Response({"status": "người dùng đã bị chặn"}, status=status.HTTP_200_OK)
 
-    @action(detail=True, methods=["post"])
+    @action(detail=True, methods=['post'])
     def unblock(self, request, pk=None):
         user = get_object_or_404(User, pk=pk)
         user.is_block = False

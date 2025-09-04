@@ -13,7 +13,7 @@ axiosClient.interceptors.request.use(
     const shouldSkip = skipAuth.some((url) => config.url.includes(url));
 
     if (!shouldSkip) {
-      const token = localStorage.getItem("access");
+      const token = localStorage.getItem("access") || sessionStorage.getItem("access");
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
       }

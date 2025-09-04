@@ -26,8 +26,8 @@ class Supplier(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return self.full_name
-    
+        return f"tên {self.full_name} - công ty {self.company_name}"
+
 # bảng Customer
 class Customer(models.Model):
     CustomerID = models.AutoField(primary_key=True)
@@ -54,10 +54,10 @@ class Product(models.Model):
     name = models.CharField(max_length=100)
     image = models.URLField(max_length=500, blank=True, null=True)
     category = models.ForeignKey(Category,on_delete=models.CASCADE)
-    supplier = models.ForeignKey(Supplier,on_delete=models.CASCADE)
+    suppliers = models.ManyToManyField(Supplier, related_name='products') # 
     price = models.DecimalField(max_digits=12, decimal_places=2)
     quantity_stock = models.IntegerField()
-    cost_price = models.DecimalField(max_digits=12, decimal_places=2)
+    cost_price = models.DecimalField(max_digits=12, decimal_places=2,null=True, blank=True)
     unit = models.CharField(max_length=50)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

@@ -1,3 +1,4 @@
+from email.mime import image
 from rest_framework import serializers
 from ...models import User, Product, Category, Supplier, Inventory
 from ...serializers import SupplierSerializer, CustomerSerializer
@@ -16,16 +17,19 @@ class CustomerSupplierUserSerializer(serializers.Serializer):
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
-        fields = ['id', 'name']
+        fields = ['CategoryID', 'name']
+        extra_kwargs = {
+            'CategoryID': {'read_only': True}
+        }
 
 class SupplierSerializer(serializers.ModelSerializer):
     class Meta:
         model = Supplier
-        fields = ['id', 'full_name']
+        fields = ['SupplierID', 'full_name', 'company_name']
 
 class ProductSerializer(serializers.ModelSerializer):
+    suppliers = SupplierSerializer(many=True, read_only=True)
     category = CategorySerializer(read_only=True)
-    supplier = SupplierSerializer(read_only=True)
     class Meta:
         model = Product
         fields = '__all__'
@@ -36,16 +40,18 @@ class CreateProductSerializer(serializers.ModelSerializer):
         ('kho HN', 'Kho HN'),
         ('kho DN', 'Kho DN'),
     ), default='kho HCM')
+    image = serializers.ImageField(write_only=True, required=True)
+
     class Meta:
         model = Product
-        fields = ['name', 'image', 'category', 'supplier', 'price', 'cost_price', 'unit', 'location']
+        fields = ['name', 'image', 'category', 'suppliers', 'price', 'cost_price', 'unit', 'location']
         extra_kwargs = {
             'name': {'required': True},
-            'image': {'required': False},
-            'category': {'required': False},
-            'supplier': {'required': False},
+            'image': {'required': True},
+            'category': {'required': True},
+            'suppliers': {'required': False},
             'price': {'required': True},
-            'cost_price': {'required': True},
+            'cost_price': {'required': False, 'default': None},
             'unit': {'required': True},
             'location': {'required': True},
         }
@@ -59,46 +65,54 @@ class CreateProductSerializer(serializers.ModelSerializer):
         if value <= 0:
             raise serializers.ValidationError("Giá phải lớn hơn 0.")
         return value
-    
-    def validate_cost_price(self, value):
-        if value < 0:
-            raise serializers.ValidationError("Giá nhập vào không được nhỏ hơn 0.")
-        return value
     def validate_unit(self, value):
         if not value:
             raise serializers.ValidationError("Unit là bắt buộc.")
         return value
-    def validate(self, data):
-        if data.get('price', 0) < data.get('cost_price', 0):
-            raise serializers.ValidationError("Giá hiện tại phải lớn hơn giá nhập vào.")
-        return data
     def validate_location(self, value):
         if not value:
             raise serializers.ValidationError("Location là bắt buộc.")
         return value
     def create(self, validated_data):
+        suppliers = validated_data.pop('suppliers', [])
         image = validated_data.pop('image', None)
         location = validated_data.pop('location', 'kho HCM')
         validated_data['quantity_stock'] = 0
         if image:
-            upload_result = cloudinary.uploader.upload(image)
-            validated_data['image'] = upload_result.get('secure_url')
+            try:
+                print("=== [LOG] Bắt đầu upload Cloudinary ===")
+                print("Loại image:", type(image), "Tên file:", getattr(image, 'name', None))
+                upload_result = cloudinary.uploader.upload(image)
+                print("=== [LOG] Kết quả upload Cloudinary:", upload_result)
+                validated_data['image'] = upload_result.get('secure_url')
+            except Exception as e:
+                print("Cloudinary upload error:", e)
+                raise serializers.ValidationError({"image": "Lỗi upload Cloudinary: %s" % e})
         product = Product.objects.create(**validated_data)
+        if suppliers:
+            product.suppliers.set(suppliers)
         Inventory.objects.create(product=product, quantity=product.quantity_stock, location=location)
         return product
 
 class UpdateProductSerializer(serializers.ModelSerializer):
+    location = serializers.ChoiceField(choices=(
+        ('kho HCM', 'Kho HCM'),
+        ('kho HN', 'Kho HN'),
+        ('kho DN', 'Kho DN'),
+    ), default='kho HCM')
+    image = serializers.ImageField(write_only=True, required=True)
     class Meta:
         model = Product
-        fields = ['id', 'name', 'image', 'category', 'supplier', 'price', 'cost_price', 'unit']
+        fields = ['name', 'image', 'category', 'suppliers', 'price', 'unit', 'location']
+
         extra_kwargs = {
             'name': {'required': True},
-            'image': {'required': False},
-            'category': {'required': False},
-            'supplier': {'required': False},
+            'image': {'required': True},
+            'category': {'required': True},
+            'suppliers': {'required': False},
             'price': {'required': True},
-            'cost_price': {'required': True},
             'unit': {'required': True},
+            'location': {'required': True},
         }
     def validate_image(self, value):
         if value and hasattr(value, 'size') and value.size > 2 * 1024 * 1024:
@@ -110,26 +124,19 @@ class UpdateProductSerializer(serializers.ModelSerializer):
         if value <= 0:
             raise serializers.ValidationError("Giá phải lớn hơn 0.")
         return value
-    def validate_cost_price(self, value):
-        if value < 0:
-            raise serializers.ValidationError("Giá nhập vào không được nhỏ hơn 0.")
-        return value
     def validate_unit(self, value):
         if not value:
             raise serializers.ValidationError("Unit là bắt buộc.")
         return value
-    def validate(self, data):
-        if data.get('price', 0) < data.get('cost_price', 0):
-            raise serializers.ValidationError("Giá hiện tại phải lớn hơn giá nhập vào.")
-        return data
     def update(self, instance, validated_data):
         instance.name = validated_data.get('name', instance.name)
         instance.category = validated_data.get('category', instance.category)
-        instance.supplier = validated_data.get('supplier', instance.supplier)
         instance.price = validated_data.get('price', instance.price)
-        instance.cost_price = validated_data.get('cost_price', instance.cost_price)
         instance.unit = validated_data.get('unit', instance.unit)
         image = validated_data.pop('image', None)
+        suppliers = validated_data.pop('suppliers', None)
+        if suppliers is not None:
+            instance.suppliers.set(suppliers)
         if image:
             upload_result = cloudinary.uploader.upload(image)
             instance.image = upload_result.get('secure_url')
