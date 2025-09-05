@@ -19,6 +19,13 @@ const All_Api = {
     createProduct: (data) => axiosClient.post('/admin/products/', data),
     updateProduct: (id, data) => axiosClient.put(`/admin/products/${id}/`, data),
     deleteProduct: (id) => axiosClient.delete(`/admin/products/${id}/`),
-    getFormdata: () => axiosClient.get('/admin/products/form-data/')
-}
+    getFormdata: () => axiosClient.get('/admin/products/form-data/'),
+    // admin purchase
+    createPurchase: (data) => axiosClient.post('/admin/purchase/', data),
+    getPurchaseById: (id) => axiosClient.get(`/admin/purchase/${id}/`),
+    listPayments: (id) => axiosClient.get(`/admin/purchase/${id}/payments/`),
+    generateQRCode: (id) => axiosClient.get(`/admin/purchase/payment/qrcode/${id}/`),
+    createPayment: (data) => axiosClient.post('/admin/purchase/payment/', data),
+
+}   
 export default All_Api;

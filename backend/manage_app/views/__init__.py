@@ -8,6 +8,7 @@ from .admin.manage_product import ManageProductViewSet
 from .admin.report import ReportViewSet,ReportRevenueViewSet
 from .admin.prosal_product import ProposalProductAdminViewSet
 from .admin.manage_cate import CategoryViewSet
+from .admin.purchase.purchase import PaymentPurchaseCreateView,PurchaseCreateView
 # supplier
 from .supplier.prosal_product import ProposalProductViewSet
 from .supplier.main import OrderDetailViewSet,HistoryStockViewSet

@@ -19,6 +19,7 @@ import InventoryList from './components/inventory/InventoryList';
 import ReportList from './components/reports/ReportList';
 import ReportDetail from './components/reports/ReportDetail';
 import { UserProvider } from './api/context/UserContext';
+import PurchaseForm from './components/products/purchase/AddPurchase';
 
 function App() {
   return (
@@ -43,6 +44,7 @@ function App() {
               <Route path="/admin/inventory" element={<InventoryList />} />
               <Route path="/admin/reports" element={<ReportList />} />
               <Route path="/admin/reports/:id" element={<ReportDetail />} />
+              <Route path="/admin/purchase" element={<PurchaseForm />} />
             </Route>
           </Route>
 
