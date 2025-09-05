@@ -9,6 +9,8 @@ import CustomerPage from './pages/CustomerPage';
 import HomePage from './pages/HomePage';
 
 import AdminLayout from './components/layouts/AdminLayout';
+import SupplierLayout from './components/layouts/SupplierLayout';
+import CustomerLayout from './components/layouts/CustomerLayout';
 import UserList from './components/users/UserList';
 import UserDetail from './components/users/UserDetail';
 import ProductList from './components/products/ProductList';
@@ -18,6 +20,21 @@ import OrderDetail from './components/orders/OrderDetail';
 import InventoryList from './components/inventory/InventoryList';
 import ReportList from './components/reports/ReportList';
 import ReportDetail from './components/reports/ReportDetail';
+import SupplierProductList from './components/supplier/products/SupplierProductList';
+import SupplierProductDetail from './components/supplier/products/SupplierProductDetail';
+import SupplierOrderList from './components/supplier/orders/SupplierOrderList';
+import SupplierOrderDetail from './components/supplier/orders/SupplierOrderDetail';
+import SupplierInventoryList from './components/supplier/inventory/SupplierInventoryList';
+import SupplierInventoryDetail from './components/supplier/inventory/SupplierInventoryDetail';
+import SupplierReportList from './components/supplier/reports/SupplierReportList';
+import SupplierReportDetail from './components/supplier/reports/SupplierReportDetail';
+import CustomerProductList from './components/customer/products/CustomerProductList';
+import CustomerProductDetail from './components/customer/products/CustomerProductDetail';
+import CustomerCart from './components/customer/cart/CustomerCart';
+import CustomerOrderList from './components/customer/orders/CustomerOrderList';
+import CustomerOrderDetail from './components/customer/orders/CustomerOrderDetail';
+import CustomerPaymentList from './components/customer/payments/CustomerPaymentList';
+import CustomerProfile from './components/customer/profile/CustomerProfile';
 import { UserProvider } from './api/context/UserContext';
 
 function App() {
@@ -46,14 +63,33 @@ function App() {
             </Route>
           </Route>
 
-          {/* Supplier protected route */}
+          {/* Supplier protected routes */}
           <Route element={<ProtectRouter allowedRoles={['supplier']} />}>
-            <Route path="/supplier" element={<SupplierPage />} />
+            <Route element={<SupplierLayout />}>
+              <Route path="/supplier" element={<SupplierPage />} />
+              <Route path="/supplier/products" element={<SupplierProductList />} />
+              <Route path="/supplier/products/:id" element={<SupplierProductDetail />} />
+              <Route path="/supplier/orders" element={<SupplierOrderList />} />
+              <Route path="/supplier/orders/:id" element={<SupplierOrderDetail />} />
+              <Route path="/supplier/inventory" element={<SupplierInventoryList />} />
+              <Route path="/supplier/inventory/:id" element={<SupplierInventoryDetail />} />
+              <Route path="/supplier/reports" element={<SupplierReportList />} />
+              <Route path="/supplier/reports/:id" element={<SupplierReportDetail />} />
+            </Route>
           </Route>
 
-          {/* Customer protected route */}
+          {/* Customer protected routes */}
           <Route element={<ProtectRouter allowedRoles={['customer']} />}>
-            <Route path="/customer" element={<CustomerPage />} />
+            <Route element={<CustomerLayout />}>
+              <Route path="/customer" element={<CustomerPage />} />
+              <Route path="/customer/products" element={<CustomerProductList />} />
+              <Route path="/customer/products/:id" element={<CustomerProductDetail />} />
+              <Route path="/customer/cart" element={<CustomerCart />} />
+              <Route path="/customer/orders" element={<CustomerOrderList />} />
+              <Route path="/customer/orders/:id" element={<CustomerOrderDetail />} />
+              <Route path="/customer/payments" element={<CustomerPaymentList />} />
+              <Route path="/customer/profile" element={<CustomerProfile />} />
+            </Route>
           </Route>
         </Routes>
       </Router>

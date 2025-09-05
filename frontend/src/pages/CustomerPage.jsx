@@ -4,9 +4,9 @@ import CustomerDashboard from '../components/dashboard/CustomerDashboard';
 
 const CustomerPage = () => {
   return (
-    <CustomerLayout>
+
       <CustomerDashboard />
-    </CustomerLayout>
+
   );
 };
 
