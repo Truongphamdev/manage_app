@@ -34,6 +34,8 @@ class ManageProductViewSet(viewsets.ViewSet):
         return Response({"error": "Dữ liệu không hợp lệ", "details": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
     def update(self, request, pk=None):
+        print("update validated_data:", request.data)
+
         product = Product.objects.filter(ProductID=pk).first()
         if not product:
             return Response({"error": "không tìm thấy sản phẩm"}, status=status.HTTP_404_NOT_FOUND)

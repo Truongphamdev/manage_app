@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+import uuid
 # bảng user
 class User(AbstractUser):
     ROLE_CHOICES = (
@@ -90,7 +91,7 @@ class Purchase(models.Model):
     total_amount = models.DecimalField(max_digits=12, decimal_places=2)
 
     def __str__(self):
-        return f"Purchase {self.purchaseID} - {self.supplier.name}"
+        return f"Purchase {self.purchaseID} - {self.supplier.full_name}"
 class PurchaseDetail(models.Model):
     purchaseDetailID = models.AutoField(primary_key=True)
     purchase = models.ForeignKey(Purchase, on_delete=models.CASCADE)
@@ -102,7 +103,7 @@ class PurchaseDetail(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"PurchaseDetail {self.id} - {self.purchase.id} - {self.product.name}"
+        return f"PurchaseDetail {self.purchaseDetailID} - {self.purchase.purchaseID} - {self.product.name}"
 # bảng order
 class Order(models.Model):
     orderID = models.AutoField(primary_key=True)
@@ -170,9 +171,14 @@ class InvoiceOrder(models.Model):
     invoice_date = models.DateTimeField(auto_now_add=True)
     total_amount = models.DecimalField(max_digits=12, decimal_places=2)
     invoice_number = models.CharField(max_length=100, blank=True, null=True)
+    method = models.CharField(max_length=50,choices=(
+        ("vnpay", "VNPAY"),
+        ("cash", "Cash"),
+    ),default="cash")
     status = models.CharField(max_length=50, choices=(
         ("paid", "Paid"),
         ("unpaid", "Unpaid"),
+        ("partially_paid", "Partially Paid"),
         ("canceled", "Canceled"),
     ), default="unpaid")
     created_at = models.DateTimeField(auto_now_add=True)
@@ -186,10 +192,15 @@ class InvoicePurchase(models.Model):
     purchase = models.ForeignKey(Purchase, on_delete=models.CASCADE)
     invoice_date = models.DateTimeField(auto_now_add=True)
     total_amount = models.DecimalField(max_digits=12, decimal_places=2)
-    invoice_number = models.CharField(max_length=100, blank=True, null=True)
+    invoice_number = models.CharField(max_length=100, blank=True, null=True, unique=True)
+    method = models.CharField(max_length=50,choices=(
+        ("vnpay", "VNPAY"),
+        ("cash", "Cash"),
+    ),default="cash")
     status = models.CharField(max_length=50, choices=(
         ("paid", "Paid"),
         ("unpaid", "Unpaid"),
+        ("partially_paid", "Partially Paid"),
         ("canceled", "Canceled"),
     ), default="unpaid")
     created_at = models.DateTimeField(auto_now_add=True)
@@ -197,15 +208,17 @@ class InvoicePurchase(models.Model):
 
     def __str__(self):
         return f"InvoicePurchase {self.id} - {self.total_amount}"
+    def save(self, *args, **kwargs):
+        if not self.invoice_number:
+            self.invoice_number = f"INV-{uuid.uuid4().hex[:10].upper()}"
+        super().save(*args, **kwargs)
 
 # bảng payment
 class PaymentOrder(models.Model):
     id = models.AutoField(primary_key=True)
     order = models.ForeignKey(Order, on_delete=models.CASCADE)
     payment_method = models.CharField(max_length=50,choices=(
-        ("credit_card", "Credit Card"),
-        ("paypal", "PayPal"),
-        ("bank_transfer", "Bank Transfer"),
+        ("vnpay", "VNPAY"),
         ("cash", "Cash"),
     ))
     amount = models.DecimalField(max_digits=12, decimal_places=2)
@@ -222,9 +235,7 @@ class PaymentPurchase(models.Model):
     id = models.AutoField(primary_key=True)
     purchase = models.ForeignKey(Purchase, on_delete=models.CASCADE)
     payment_method = models.CharField(max_length=50,choices=(
-        ("credit_card", "Credit Card"),
-        ("paypal", "PayPal"),
-        ("bank_transfer", "Bank Transfer"),
+        ("vnpay", "VNPAY"),
         ("cash", "Cash"),
     ))
     amount = models.DecimalField(max_digits=12, decimal_places=2)
@@ -252,4 +263,5 @@ class CartItem(models.Model):
     price = models.DecimalField(max_digits=12, decimal_places=2)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-# thêm bảng xuất ,háo đơn xuát
+    def __str__(self):
+        return f"CartItem {self.id} - {self.product.name} - {self.quantity}"

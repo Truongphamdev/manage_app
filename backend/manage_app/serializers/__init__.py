@@ -4,7 +4,8 @@ CustomerSerializer,UserUpdateSerializer,ChangePasswordSerializer,UserSerializer,
 # admin
 from .admin.manage_serializer import CustomerSupplierUserSerializer,ProductSerializer,CreateProductSerializer,CategorySerializer,UpdateProductSerializer
 from .admin.report import StockReportSerializer,ReportRevenueSerializer
-
+from .admin.purchase_serializer import PaymentPurchaseCreateSerializer,ProductSerializer,PurchaseSerializer,\
+PurchaseDetailSerializer,InventorySerializer,CreatePurchaseSerializer
 # supplier
 from .supplier.prosal_product import ProposalProductSerializer,ProposalProductAdminSerializer
 from .supplier.main import OrderDetailSerializer,HistoryStockSerializer

@@ -2,7 +2,8 @@ from django.urls import path
 from .views import (
     RegisterView, LoginView, UserManagementViewSet, ManageProductViewSet,
     ReportViewSet, ReportRevenueViewSet, ProposalProductAdminViewSet, ProposalProductViewSet,
-    OrderDetailViewSet, HistoryStockViewSet, CategoryViewSet, CartViewSet, SupplierCreateViewSet
+    OrderDetailViewSet, HistoryStockViewSet, CategoryViewSet, CartViewSet, SupplierCreateViewSet,
+    PurchaseCreateView, PaymentPurchaseCreateView
 )
 from rest_framework_simplejwt.views import TokenRefreshView
 
@@ -39,7 +40,10 @@ urlpatterns = [
     # Admin category
     path('admin/categories/', CategoryViewSet.as_view({'post': 'create'}), name='add-category'),
     path('admin/categories/<int:pk>/', CategoryViewSet.as_view({'put': 'update', 'delete': 'destroy'}), name='update-delete-category'),
-
+    # purchase
+    path('admin/purchase/', PurchaseCreateView.as_view({'post': 'create'}), name='create'),
+    path('admin/purchase/payment/', PaymentPurchaseCreateView.as_view({'post': 'create'}), name='payment-create'),
+    path('admin/purchase/payment/qrcode/<int:pk>/', PaymentPurchaseCreateView.as_view({'get': 'get'}), name='payment-qrcode'),
     # Supplier proposal
     path('supplier/proposal/', ProposalProductViewSet.as_view({'post': 'create'}), name='create-proposal'),
 

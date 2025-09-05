@@ -30,9 +30,13 @@ class SupplierSerializer(serializers.ModelSerializer):
 class ProductSerializer(serializers.ModelSerializer):
     suppliers = SupplierSerializer(many=True, read_only=True)
     category = CategorySerializer(read_only=True)
+    location = serializers.SerializerMethodField()
     class Meta:
         model = Product
         fields = '__all__'
+    def get_location(self, obj):
+        inventory = Inventory.objects.filter(product=obj).first()
+        return inventory.location if inventory else None
 
 class CreateProductSerializer(serializers.ModelSerializer):
     location = serializers.ChoiceField(choices=(
@@ -143,4 +147,6 @@ class UpdateProductSerializer(serializers.ModelSerializer):
         elif isinstance(image, str):
             instance.image = image
         instance.save()
+        Inventory.objects.filter(product=instance).update( quantity=instance.quantity_stock, location=validated_data.get('location'))
         return instance
+    
