@@ -60,7 +60,7 @@ const PurchaseForm = () => {
           navigate("/admin/purchase/payments");
         }
     } catch (err) {
-      setErrors(err.response?.data || "Error creating purchase");
+      setErrors(err?.response?.data || "Error creating purchase");
     }
   };
    
@@ -175,6 +175,9 @@ const PurchaseForm = () => {
       className="bg-blue-600 text-white px-5 py-2 rounded-lg shadow hover:bg-blue-700 transition"
     >
       Tạo phiếu nhập
+    </button>
+    <button type="button" onClick={() => navigate(-1)} className="ml-3 bg-gray-300 text-gray-700 px-5 py-2 rounded-lg shadow hover:bg-gray-400 transition">
+      Hủy
     </button>
   </div>
 

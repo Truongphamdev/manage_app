@@ -47,26 +47,27 @@ const ProductDetail = () => {
           </p>
           <p>
             <span className="font-semibold">Danh mục:</span>{" "}
-            {product.category?.name}
+            {product.category.name}
           </p>
           <p>
             <span className="font-semibold">Giá:</span>{" "}
-            {product.price.toLocaleString()} VNĐ
+             {product.price
+              ? Number(product.price).toLocaleString('vi-VN', { style: 'currency', currency: 'VND', minimumFractionDigits: 0 })
+              : '0₫'}
           </p>
           <p>
-            <span className="font-semibold">Tồn kho:</span> {product.stock}
+            <span className="font-semibold">Tồn kho:</span> {product.quantity_stock}
           </p>
           <p>
             <span className="font-semibold">Nhà cung cấp:</span>{" "}
             {Array.isArray(product.suppliers)
-              ? product.suppliers.map((sup) => sup.full_name).join(", ")
+              ? product.suppliers.map(sup => sup.full_name).join(", ")
               : ""}
           </p>
           <p>
             <span className="font-semibold">Tên công ty:</span>{" "}
-            {Array.isArray(product.suppliers)
-              ? product.suppliers.map((sup) => sup.company_name).join(", ")
-              : ""}
+            {product.company_name
+}
           </p>
         </div>
       </div>

@@ -23,9 +23,38 @@ class InventorySerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class ProductSerializer(serializers.ModelSerializer):
+    suppliers = serializers.SerializerMethodField()
+    category = serializers.SerializerMethodField()
+    company_name = serializers.SerializerMethodField()
+
     class Meta:
         model = Product
         fields = '__all__'
+
+    def get_suppliers(self, obj):
+        # Trả về danh sách NCC dạng object (id, full_name, company_name)
+        return [
+            {
+                "SupplierID": sup.pk,
+                "full_name": sup.full_name,
+                "company_name": sup.company_name
+            }
+            for sup in obj.suppliers.all()
+        ]
+
+    def get_category(self, obj):
+        # Trả về category là object (id, name)
+        if obj.category:
+            return {
+                "CategoryID": obj.category.pk,
+                "name": obj.category.name
+            }
+        return None
+
+    def get_company_name(self, obj):
+        # Trả về tên công ty của NCC đầu tiên (nếu có)
+        first_sup = obj.suppliers.first()
+        return first_sup.company_name if first_sup else None
 
 class SupplierSerializer(serializers.ModelSerializer):
     class Meta:
@@ -118,7 +147,7 @@ class CreatePurchaseSerializer(serializers.Serializer):
                 purchase=purchase,
                 invoice_date=purchase_date,
                 method='cash',
-                status='unpaid',
+                status='paid',
                 total_amount=total_amount,
             )
         return purchase
