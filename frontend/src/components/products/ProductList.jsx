@@ -10,8 +10,9 @@ const ProductList = () => {
     suppliers:[],
     price:0,
     unit:'',
-    location:'',
+    quantity_stock:'',
   } );
+  const locations = ['kho HCM', 'kho HN', 'kho DN'];
   const [products, setProducts] = React.useState([]);
   const [suppliers,setSuppliers] = useState([]);
   const [categories,setCategories] = useState([]);
@@ -19,7 +20,6 @@ const ProductList = () => {
   const [showAddProductForm, setShowAddProductForm] = useState(false);
   const [showUpdateProductForm, setShowUpdateProductForm] = useState(false);
   const [editProductId, setEditProductId] = useState(null);
-  const locations = ['kho HCM', 'kho HN', 'kho DN'];
   const [previewImage, setPreviewImage] = useState(null);
   const initFormdata = {
     name: '',
@@ -28,7 +28,7 @@ const ProductList = () => {
     suppliers: [],
     price: 0,
     unit: '',
-    location: '',
+    quantity_stock: '',
   };
   const navigate = useNavigate();
   console.log("Dữ liệu sản phẩm:", products);
@@ -51,7 +51,8 @@ const ProductList = () => {
   "Gói",
   "Mét",
   "Đôi",
-  "Cặp"
+  "Cặp",
+  "Bao"
 ];
 // lấy dữ liệu cho các trường trong form
   const getFormData  = async() => {
@@ -103,7 +104,6 @@ const ProductList = () => {
     formData.suppliers.forEach(id => data.append("suppliers", id));
     data.append("price", formData.price);
     data.append("unit", formData.unit);
-    data.append("location", formData.location);
     try {
       const response = await All_Api.createProduct(data);
       getProducts();
@@ -151,7 +151,7 @@ const ProductList = () => {
     editProductId.suppliers.forEach(sup => data.append('suppliers', sup.SupplierID));
     data.append("price", editProductId.price);
     data.append("unit", editProductId.unit);
-    data.append("location", editProductId.location);
+    data.append("quantity_stock", Number(editProductId.quantity_stock));
     try {
       const response = await All_Api.updateProduct(editProductId.ProductID, data);
       getProducts();
@@ -166,6 +166,8 @@ const ProductList = () => {
       setErrors(error?.response?.data);
     }
   };
+  // dữ liệu edit
+  console.log("editProductId",editProductId)
   return (
     <>
       <div className="flex justify-between mb-6">
@@ -207,19 +209,19 @@ const ProductList = () => {
             </h2>
             <p className="text-sm text-gray-500">
               <strong>Danh mục:</strong>{" "}
-              {product.category?.name || "Chưa có danh mục"}
+              {product.category.name || "Chưa có danh mục"}
             </p>
 
             <p className="text-sm text-gray-500 truncate">
               <strong>NCC:</strong>{" "}
               {Array.isArray(product.suppliers)
-                ? product.suppliers.map((sup) => sup.full_name).join(", ")
+                ? product.suppliers.map(sup => sup.full_name).join(", ")
                 : ""}
             </p>
 
-            <p className="mt-2 text-lg font-bold text-orange-600">
-              {product.price ? product.price.toLocaleString() : 0}₫
-            </p>
+            {product.price
+              ? Number(product.price).toLocaleString('vi-VN', { style: 'currency', currency: 'VND', minimumFractionDigits: 0 })
+              : '0₫'}
 
             <div className="mt-3 flex items-center justify-between">
               <Link
@@ -368,26 +370,6 @@ const ProductList = () => {
                   <p className="text-red-500 text-sm">{errors.unit[0]}</p>
                 )}
               </div>
-              <div>
-                <label className="block font-medium mb-1">Vị trí kho</label>
-                  <select
-                    required
-                    name="location"
-                    className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    value={formData.location}
-                    onChange={handleProductChange}
-                  >
-                    <option value="">Chọn kho</option>
-                    {locations.map((loc) => (
-                      <option key={loc} value={loc}>
-                        {loc}
-                      </option>
-                    ))}
-                  </select>
-                {errors?.location && (
-                  <p className="text-red-500 text-sm">{errors.location[0]}</p>
-                )}
-              </div>
               <div className="mt-4">
                 <button
                   type="submit"
@@ -433,7 +415,6 @@ const ProductList = () => {
               <div>
                 <label className="block font-medium mb-1">Ảnh sản phẩm</label>
                 <input
-                  required
                   type="file"
                   name="image"
                   className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -535,23 +516,18 @@ const ProductList = () => {
                 )}
               </div>
               <div>
-                <label className="block font-medium mb-1">Vị trí kho</label>
-                  <select
-                    required
-                    name="location"
-                    className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    value={editProductId.location}
-                    onChange={e => setEditProductId({ ...editProductId, location: e.target.value })}
-                  >
-                    <option value="">Chọn kho</option>
-                    {locations.map((loc) => (
-                      <option key={loc} value={loc}>
-                        {loc}
-                      </option>
-                    ))}
-                  </select>
-                {errors?.location && (
-                  <p className="text-red-500 text-sm">{errors.location[0]}</p>
+                <label className="block font-medium mb-1">Số lượng tồn kho</label>
+                <input
+                  required
+                  type="number"
+                  name="quantity_stock"
+                  className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  value={editProductId.quantity_stock}
+                  onChange={e => setEditProductId({ ...editProductId, quantity_stock: e.target.value })}
+                  placeholder="Số lượng tồn kho"
+                />
+                {errors?.quantity_stock && (
+                  <p className="text-red-500 text-sm">{errors.quantity_stock[0]}</p>
                 )}
               </div>
               <div className="mt-4">

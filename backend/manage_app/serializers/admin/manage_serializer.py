@@ -99,15 +99,10 @@ class CreateProductSerializer(serializers.ModelSerializer):
         return product
 
 class UpdateProductSerializer(serializers.ModelSerializer):
-    location = serializers.ChoiceField(choices=(
-        ('kho HCM', 'Kho HCM'),
-        ('kho HN', 'Kho HN'),
-        ('kho DN', 'Kho DN'),
-    ), default='kho HCM')
     image = serializers.ImageField(write_only=True, required=True)
     class Meta:
         model = Product
-        fields = ['name', 'image', 'category', 'suppliers', 'price', 'unit', 'location']
+        fields = ['name', 'image', 'category', 'suppliers', 'price', 'unit','quantity_stock']
 
         extra_kwargs = {
             'name': {'required': True},
@@ -116,7 +111,7 @@ class UpdateProductSerializer(serializers.ModelSerializer):
             'suppliers': {'required': False},
             'price': {'required': True},
             'unit': {'required': True},
-            'location': {'required': True},
+            'quantity_stock': {'required': True},
         }
     def validate_image(self, value):
         if value and hasattr(value, 'size') and value.size > 2 * 1024 * 1024:
@@ -132,11 +127,16 @@ class UpdateProductSerializer(serializers.ModelSerializer):
         if not value:
             raise serializers.ValidationError("Unit là bắt buộc.")
         return value
+    def validate_quantity_stock(self, value):
+        if value < 0:
+            raise serializers.ValidationError("Số lượng tồn kho không được âm.")
+        return value
     def update(self, instance, validated_data):
         instance.name = validated_data.get('name', instance.name)
         instance.category = validated_data.get('category', instance.category)
         instance.price = validated_data.get('price', instance.price)
         instance.unit = validated_data.get('unit', instance.unit)
+        instance.quantity_stock = validated_data.get('quantity_stock', instance.quantity_stock)
         image = validated_data.pop('image', None)
         suppliers = validated_data.pop('suppliers', None)
         if suppliers is not None:
@@ -147,6 +147,6 @@ class UpdateProductSerializer(serializers.ModelSerializer):
         elif isinstance(image, str):
             instance.image = image
         instance.save()
-        Inventory.objects.filter(product=instance).update( quantity=instance.quantity_stock, location=validated_data.get('location'))
+        Inventory.objects.filter(product=instance).update( quantity=instance.quantity_stock)
         return instance
     
