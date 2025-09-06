@@ -25,18 +25,23 @@ const LoginForm = () => {
     setUser(response.user);
     if(response.user.role === 'admin'){
       navigate('/admin');
-    } else if(response.user.role === 'supplier'){
+    } else if(response.user.role === 'supplier' || response.user.is_block === false){
       navigate('/supplier');
-    } else if(response.user.role === 'customer'){
+    } else if(response.user.role === 'customer' || response.user.is_block === false){
       navigate('/customer');
+    }
+    else {
+      window.alert("Tài khoản của bạn đã bị khóa. Vui lòng liên hệ quản trị viên.");
+      return;
     }
     window.alert("Đăng nhập thành công");
     console.log(response);
     
     } catch (error) {
-      setErrors(error.response.data);
+      setErrors(error.response?.data);
     }
   };
+  console.log(errors);
 
   return (
     <div>
@@ -62,7 +67,9 @@ const LoginForm = () => {
             className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
             required
           />
-          {errors.password && <p className="text-red-500 text-sm">{errors.password[0]}</p>}
+          {errors.non_field_errors && (
+  <p className="text-red-500 text-sm">{errors.non_field_errors[0]}</p>
+)}
         </div>
         <div className="flex items-center justify-between">
           <div className="flex items-center">

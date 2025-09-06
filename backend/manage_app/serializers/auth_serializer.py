@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from ..models import User, Supplier, Customer
 from django.db import transaction
-
+from django.contrib.auth import get_user_model
 class UserRegistrationSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(required=True)
     password = serializers.CharField(write_only=True, required=True)
@@ -68,18 +68,75 @@ class UserLoginSerializer(serializers.Serializer):
         return data
 
 class CustomerSerializer(serializers.ModelSerializer):
+    email = serializers.EmailField(source='user.email')
+    is_block = serializers.BooleanField(source='user.is_block', read_only=True)
+
     class Meta:
         model = Customer
-        fields = [ 'user', 'full_name', 'address', 'phone']
+        fields = ['CustomerID', 'user', 'full_name', 'address', 'phone', 'email', 'is_block']
+        read_only_fields = ['CustomerID', 'is_block']
+
+    def validate_email(self, value):
+        User = get_user_model()
+        # Nếu là update, loại trừ user hiện tại ra khỏi check trùng
+        user_instance = getattr(self.instance, 'user', None)
+        qs = User.objects.filter(email=value)
+        if user_instance:
+            qs = qs.exclude(pk=user_instance.pk)
+        if qs.exists():
+            raise serializers.ValidationError("Email này đã tồn tại trong hệ thống.")
+        return value
+    def update(self, instance, validated_data):
+        user_data = validated_data.pop('user', {})
+        email = user_data.get('email')
+        if email:
+            instance.user.email = email
+            instance.user.username = validated_data.get('full_name', instance.user.username)
+            instance.user.save()
+
+        # Cập nhật các trường của Customer
+        instance.full_name = validated_data.get('full_name', instance.full_name)
+        instance.address = validated_data.get('address', instance.address)
+        instance.phone = validated_data.get('phone', instance.phone)
+        instance.save()
+        return instance
 
 class SupplierSerializer(serializers.ModelSerializer):
+    email = serializers.EmailField(source='user.email')
+    is_block = serializers.BooleanField(source='user.is_block', read_only=True)
+
     class Meta:
         model = Supplier
-        fields = [ 'user', 'full_name', 'address', 'phone']
+        fields = ['SupplierID', 'user', 'full_name', 'address', 'phone', 'company_name', 'email', 'is_block']
+        read_only_fields = ['SupplierID', 'is_block']
+
+    def validate_email(self, value):
+        User = get_user_model()
+        user_instance = getattr(self.instance, 'user', None)
+        qs = User.objects.filter(email=value)
+        if user_instance:
+            qs = qs.exclude(pk=user_instance.pk)
+        if qs.exists():
+            raise serializers.ValidationError("Email này đã tồn tại trong hệ thống.")
+        return value
+    def update(self, instance, validated_data):
+        user_data = validated_data.pop('user', {})
+        email = user_data.get('email')
+        if email:
+            instance.user.email = email
+            instance.user.username = validated_data.get('full_name', instance.user.username)
+            instance.user.save()
+        
+        instance.full_name = validated_data.get('full_name', instance.full_name)
+        instance.address = validated_data.get('address', instance.address)
+        instance.phone = validated_data.get('phone', instance.phone)
+        instance.company_name = validated_data.get('company_name', instance.company_name)
+        instance.save()
+        return instance
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'email', 'role', 'is_block']
+        fields = ['id', 'email','username', 'role', 'is_block']
 
 class UserUpdateSerializer(serializers.ModelSerializer):
     full_name = serializers.CharField(required=True)
@@ -150,10 +207,11 @@ class SupplierCreateSerializer(serializers.ModelSerializer):
     full_name = serializers.CharField(required=True)
     address = serializers.CharField(required=False, allow_blank=True)
     phone = serializers.CharField(required=False, allow_blank=True)
+    company_name = serializers.CharField(required=False, allow_blank=True)
 
     class Meta:
         model = User
-        fields = ['email', 'password', 'full_name', 'address', 'phone']
+        fields = ['email', 'password', 'full_name', 'address', 'phone', 'company_name']
     def validate_email(self, value):
         if User.objects.filter(email=value).exists():
             raise serializers.ValidationError("Email đã tồn tại")
@@ -177,6 +235,7 @@ class SupplierCreateSerializer(serializers.ModelSerializer):
             user=user,
             full_name=validated_data['full_name'],
             address=validated_data['address'],
-            phone=validated_data['phone']
+            phone=validated_data['phone'],
+            company_name=validated_data['company_name']
         )
         return user 

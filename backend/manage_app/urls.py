@@ -2,7 +2,8 @@ from django.urls import path
 from .views import (
     RegisterView, LoginView, UserManagementViewSet, ManageProductViewSet,
     ReportViewSet, ReportRevenueViewSet, ProposalProductAdminViewSet, ProposalProductViewSet,
-    OrderDetailViewSet, HistoryStockViewSet, CategoryViewSet, CartViewSet, SupplierCreateViewSet
+    OrderDetailViewSet, HistoryStockViewSet, CategoryViewSet, CartViewSet, SupplierCreateViewSet,
+    PurchaseCreateView, PaymentPurchaseCreateView
 )
 from rest_framework_simplejwt.views import TokenRefreshView
 
@@ -14,12 +15,13 @@ urlpatterns = [
     # Admin user management
     path('admin/users/', UserManagementViewSet.as_view({'get': 'list'})),
     path('admin/users/<int:pk>/', UserManagementViewSet.as_view({
-        'get': 'detail_user',
+        'put': 'update',
+        'get': 'retrieve',
         'delete': 'destroy'
     })),
-    path('admin/users/<int:pk>/block/', UserManagementViewSet.as_view({'put': 'block_user'})),
-    path('admin/users/<int:pk>/unblock/', UserManagementViewSet.as_view({'put': 'unblock_user'})),
-    path('admin/suppliers/', SupplierCreateViewSet.as_view({'post': 'create'}), name='create-supplier'),
+    path('admin/users/<int:pk>/block/', UserManagementViewSet.as_view({'post': 'block'})),
+    path('admin/users/<int:pk>/unblock/', UserManagementViewSet.as_view({'post': 'unblock'})),
+    path('admin/supplier/', SupplierCreateViewSet.as_view({'post': 'create'}), name='create-supplier'),
 
     # Admin product management
     path('admin/products/', ManageProductViewSet.as_view({'get':'list', 'post':'create'})),
@@ -38,7 +40,10 @@ urlpatterns = [
     # Admin category
     path('admin/categories/', CategoryViewSet.as_view({'post': 'create'}), name='add-category'),
     path('admin/categories/<int:pk>/', CategoryViewSet.as_view({'put': 'update', 'delete': 'destroy'}), name='update-delete-category'),
-
+    # purchase
+    path('admin/purchase/', PurchaseCreateView.as_view({'post': 'create'}), name='create'),
+    path('admin/purchase/payment/', PaymentPurchaseCreateView.as_view({'post': 'create'}), name='payment-create'),
+    path('admin/purchase/payment/qrcode/<int:pk>/', PaymentPurchaseCreateView.as_view({'get': 'get'}), name='payment-qrcode'),
     # Supplier proposal
     path('supplier/proposal/', ProposalProductViewSet.as_view({'post': 'create'}), name='create-proposal'),
 

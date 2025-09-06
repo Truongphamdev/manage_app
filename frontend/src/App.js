@@ -36,6 +36,7 @@ import CustomerOrderDetail from './components/customer/orders/CustomerOrderDetai
 import CustomerPaymentList from './components/customer/payments/CustomerPaymentList';
 import CustomerProfile from './components/customer/profile/CustomerProfile';
 import { UserProvider } from './api/context/UserContext';
+import PurchaseForm from './components/products/purchase/AddPurchase';
 
 function App() {
   return (
@@ -60,6 +61,7 @@ function App() {
               <Route path="/admin/inventory" element={<InventoryList />} />
               <Route path="/admin/reports" element={<ReportList />} />
               <Route path="/admin/reports/:id" element={<ReportDetail />} />
+              <Route path="/admin/purchase" element={<PurchaseForm />} />
             </Route>
           </Route>
 
