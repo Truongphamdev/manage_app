@@ -23,15 +23,15 @@ const LoginForm = () => {
       sessionStorage.setItem('user', JSON.stringify(response.user));
     }
     setUser(response.user);
-    if(response.user.role === 'admin'){
+    if(response.user.role === 'admin' && response.user.is_block === false){
       navigate('/admin');
-    } else if(response.user.role === 'supplier' || response.user.is_block === false){
+    } else if(response.user.role === 'supplier' && response.user.is_block === false){
       navigate('/supplier');
-    } else if(response.user.role === 'customer' || response.user.is_block === false){
+    } else if(response.user.role === 'customer' && response.user.is_block === false){
       navigate('/customer');
-    }
-    else {
+    } else if (response.user.is_block === true) {
       window.alert("Tài khoản của bạn đã bị khóa. Vui lòng liên hệ quản trị viên.");
+      navigate('/');
       return;
     }
     window.alert("Đăng nhập thành công");
@@ -41,6 +41,7 @@ const LoginForm = () => {
       setErrors(error.response?.data);
     }
   };
+      
   console.log(errors);
 
   return (
