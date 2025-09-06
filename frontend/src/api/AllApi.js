@@ -26,6 +26,10 @@ const All_Api = {
     listPayments: (id) => axiosClient.get(`/admin/purchase/${id}/payments/`),
     generateQRCode: (id) => axiosClient.get(`/admin/purchase/payment/qrcode/${id}/`),
     createPayment: (data) => axiosClient.post('/admin/purchase/payment/', data),
+    // profile
+    updateUserProfile: (data) => axiosClient.put('/auth/user/update/', data),
+    changePassword: (data) => axiosClient.post('/auth/user/change-password/', data),
+    // supplier
 
 }   
 export default All_Api;

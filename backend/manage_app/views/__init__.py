@@ -14,3 +14,4 @@ from .supplier.prosal_product import ProposalProductViewSet
 from .supplier.main import OrderDetailViewSet,HistoryStockViewSet
 # customer
 from .customer.cart import CartViewSet
+from .auth.auth_view import UpdateUserView,ChangePasswordView

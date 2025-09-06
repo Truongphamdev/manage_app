@@ -41,6 +41,7 @@ class LoginView(APIView):
             else:
                 user_data = {"id": user.id, "email": user.email}
             user_data['role'] = user.role
+            user_data['is_block'] = user.is_block
             user_data['full_name'] = user.username
             return Response({
                 'access': str(refresh.access_token),

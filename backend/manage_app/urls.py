@@ -3,7 +3,7 @@ from .views import (
     RegisterView, LoginView, UserManagementViewSet, ManageProductViewSet,
     ReportViewSet, ReportRevenueViewSet, ProposalProductAdminViewSet, ProposalProductViewSet,
     OrderDetailViewSet, HistoryStockViewSet, CategoryViewSet, CartViewSet, SupplierCreateViewSet,
-    PurchaseCreateView, PaymentPurchaseCreateView
+    PurchaseCreateView, PaymentPurchaseCreateView, UpdateUserView, ChangePasswordView
 )
 from rest_framework_simplejwt.views import TokenRefreshView
 
@@ -56,4 +56,7 @@ urlpatterns = [
     path('customer/cart/', CartViewSet.as_view({'get': 'list'}), name='cart-list'),
     path('customer/cart/add/', CartViewSet.as_view({'post': 'add_to_cart'}), name='cart-add'),
     path('customer/cart/remove/<int:pk>/', CartViewSet.as_view({'delete': 'remove_cartitem'}), name='cart-remove'),
+    # profile
+    path('auth/user/update/', UpdateUserView.as_view(), name='update-user'),
+    path('auth/user/change-password/', ChangePasswordView.as_view(), name='change-password'),
 ]
