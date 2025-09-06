@@ -4,9 +4,9 @@ import SupplierDashboard from '../components/dashboard/SupplierDashboard';
 
 const SupplierPage = () => {
   return (
-    <SupplierLayout>
+
       <SupplierDashboard />
-    </SupplierLayout>
+
   );
 };
 

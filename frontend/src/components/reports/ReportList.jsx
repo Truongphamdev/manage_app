@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import * as XLSX from 'xlsx';
+import { Document, Packer, Paragraph, Table, TableRow, TableCell, WidthType, BorderStyle, TextRun, AlignmentType, ShadingType, Header, Footer, PageNumber } from 'docx';
+import { saveAs } from 'file-saver';
 
 const ReportList = () => {
   const mockReports = [
@@ -243,85 +244,468 @@ const ReportList = () => {
     },
   ];
 
-  const exportToExcel = (report) => {
+  const exportToWord = (report) => {
     if (!report || !report.Content || !report.Content.data) {
       console.error('Invalid report data:', report);
       return;
     }
 
-    const wb = XLSX.utils.book_new();
-
-    // Sheet 1: Thông tin cơ bản
-    const basicInfo = [
-      ['Mã báo cáo', report.ReportID],
-      ['Loại báo cáo', report.Type],
-      ['Ngày tạo', new Date(report.Created_at).toLocaleDateString()],
-      ['Ngày cập nhật cuối', new Date(report.LastUpdated).toLocaleDateString()],
-      ['Người tạo', report.Author],
-      ['Mô tả', report.Details],
-      ['Ghi chú', report.Notes || 'Không có'],
-      ['Tóm tắt', report.Content.summary],
-    ];
-    const ws1 = XLSX.utils.aoa_to_sheet(basicInfo);
-    XLSX.utils.book_append_sheet(wb, ws1, 'Thông tin cơ bản');
-
-    // Sheet 2: Nội dung báo cáo
-    let dataHeaders = [];
-    let dataRows = [];
-    if (report.Type === 'Doanh thu') {
-      dataHeaders = ['Sản phẩm', 'Danh mục', 'Doanh thu (VNĐ)', 'Số lượng bán', 'Giá mỗi đơn vị (VNĐ)'];
-      dataRows = report.Content.data.map((item) => [
-        item.product,
-        item.category,
-        item.revenue,
-        item.unitsSold,
-        item.pricePerUnit,
-      ]);
-    } else if (report.Type === 'Tồn kho' || report.Type === 'Nhập kho' || report.Type === 'Xuất kho') {
-      dataHeaders = ['Sản phẩm', 'Danh mục', 'Số lượng', 'Vị trí', 'Nhà cung cấp', 'Trạng thái'];
-      if (report.Type !== 'Tồn kho') dataHeaders.push('Ngày');
-      dataRows = report.Content.data.map((item) => {
-        const row = [item.product, item.category, item.quantity, item.location, item.supplier, item.status];
-        if (report.Type !== 'Tồn kho') row.push(item.date);
-        return row;
+    // Tạo bảng với viền, căn chỉnh và số thứ tự
+    const createTable = (headers, rows) => {
+      return new Table({
+        width: { size: 100, type: WidthType.PERCENTAGE },
+        rows: [
+          new TableRow({
+            children: ['STT', ...headers].map(
+              (header, index) =>
+                new TableCell({
+                  children: [
+                    new Paragraph({
+                      children: [
+                        new TextRun({
+                          text: header,
+                          bold: true,
+                          size: 24,
+                          color: 'FFFFFF',
+                          font: 'Arial',
+                        }),
+                      ],
+                      alignment: AlignmentType.CENTER,
+                    }),
+                  ],
+                  shading: { fill: '2B6CB0', type: ShadingType.SOLID },
+                  borders: {
+                    top: { style: BorderStyle.SINGLE, size: 2 },
+                    bottom: { style: BorderStyle.SINGLE, size: 2 },
+                    left: { style: BorderStyle.SINGLE, size: 2 },
+                    right: { style: BorderStyle.SINGLE, size: 2 },
+                  },
+                  width: index === 0 ? { size: 10, type: WidthType.PERCENTAGE } : undefined,
+                })
+            ),
+          }),
+          ...rows.map(
+            (row, index) =>
+              new TableRow({
+                children: [index + 1, ...row].map(
+                  (cell, cellIndex) =>
+                    new TableCell({
+                      children: [
+                        new Paragraph({
+                          children: [
+                            new TextRun({
+                              text: String(cell),
+                              size: 22,
+                              font: 'Arial',
+                            }),
+                          ],
+                          alignment: cellIndex === 0 ? AlignmentType.CENTER : AlignmentType.LEFT,
+                        }),
+                      ],
+                      borders: {
+                        top: { style: BorderStyle.SINGLE, size: 1 },
+                        bottom: { style: BorderStyle.SINGLE, size: 1 },
+                        left: { style: BorderStyle.SINGLE, size: 1 },
+                        right: { style: BorderStyle.SINGLE, size: 1 },
+                      },
+                      width: cellIndex === 0 ? { size: 10, type: WidthType.PERCENTAGE } : undefined,
+                    })
+                ),
+              })
+          ),
+        ],
       });
-    } else if (report.Type === 'Đơn hàng') {
-      dataHeaders = ['Mã đơn hàng', 'Khách hàng', 'Tổng tiền (VNĐ)', 'Trạng thái', 'Số lượng sản phẩm'];
-      dataRows = report.Content.data.map((item) => [
-        item.orderId,
-        item.customer,
-        item.total,
-        item.status,
-        item.items.reduce((sum, i) => sum + i.quantity, 0),
-      ]);
-    }
-    const ws2 = XLSX.utils.aoa_to_sheet([dataHeaders, ...dataRows]);
-    XLSX.utils.book_append_sheet(wb, ws2, 'Nội dung báo cáo');
+    };
 
-    // Sheet 3: Số liệu bổ sung
-    const metricsHeaders = ['Chỉ số', 'Giá trị'];
-    const metricsRows = report.Content.additionalMetrics.map((metric) => [metric.key, metric.value]);
-    const ws3 = XLSX.utils.aoa_to_sheet([metricsHeaders, ...metricsRows]);
-    XLSX.utils.book_append_sheet(wb, ws3, 'Số liệu bổ sung');
+    // Tạo nội dung tài liệu Word
+    const doc = new Document({
+      sections: [
+        {
+          properties: {
+            page: {
+              margin: { top: 720, bottom: 720, left: 720, right: 720 },
+            },
+          },
+          headers: {
+            default: new Header({
+              children: [
+                new Paragraph({
+                  children: [
+                    new TextRun({
+                      text: 'CÔNG TY VẬT TƯ XÂY DỰNG XYZ',
+                      bold: true,
+                      size: 20,
+                      font: 'Arial',
+                    }),
+                  ],
+                  alignment: AlignmentType.CENTER,
+                }),
+              ],
+            }),
+          },
+          footers: {
+            default: new Footer({
+              children: [
+                new Paragraph({
+                  children: [
+                    new TextRun({
+                      text: 'Trang ',
+                      size: 20,
+                      font: 'Arial',
+                    }),
+                    new TextRun({
+                      children: [PageNumber.CURRENT],
+                      size: 20,
+                      font: 'Arial',
+                    }),
+                    new TextRun({
+                      text: ' / ',
+                      size: 20,
+                      font: 'Arial',
+                    }),
+                    new TextRun({
+                      children: [PageNumber.TOTAL_PAGES],
+                      size: 20,
+                      font: 'Arial',
+                    }),
+                  ],
+                  alignment: AlignmentType.CENTER,
+                }),
+              ],
+            }),
+          },
+          children: [
+            // Trang bìa
+            new Paragraph({
+              children: [
+                new TextRun({
+                  text: '[LOGO CÔNG TY]',
+                  bold: true,
+                  size: 36,
+                  font: 'Arial',
+                }),
+              ],
+              alignment: AlignmentType.CENTER,
+              spacing: { after: 400 },
+            }),
+            new Paragraph({
+              children: [
+                new TextRun({
+                  text: 'CÔNG TY VẬT TƯ XÂY DỰNG XYZ',
+                  bold: true,
+                  size: 32,
+                  font: 'Arial',
+                }),
+              ],
+              alignment: AlignmentType.CENTER,
+              spacing: { after: 200 },
+            }),
+            new Paragraph({
+              children: [
+                new TextRun({
+                  text: `BÁO CÁO ${report.Type.toUpperCase()}`,
+                  bold: true,
+                  size: 36,
+                  font: 'Arial',
+                }),
+              ],
+              alignment: AlignmentType.CENTER,
+              spacing: { after: 200 },
+            }),
+            new Paragraph({
+              children: [
+                new TextRun({
+                  text: report.Details,
+                  bold: true,
+                  size: 28,
+                  font: 'Arial',
+                }),
+              ],
+              alignment: AlignmentType.CENTER,
+              spacing: { after: 400 },
+            }),
+            new Paragraph({
+              children: [
+                new TextRun({
+                  text: `Ngày xuất báo cáo: ${new Date().toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' })}`,
+                  size: 24,
+                  font: 'Arial',
+                }),
+              ],
+              alignment: AlignmentType.CENTER,
+              spacing: { after: 400 },
+            }),
+            new Paragraph({
+              children: [
+                new TextRun({
+                  text: 'Người lập báo cáo: ' + report.Author,
+                  size: 24,
+                  font: 'Arial',
+                }),
+              ],
+              alignment: AlignmentType.CENTER,
+              spacing: { after: 7200 },
+            }),
+            // Phần giới thiệu
+            new Paragraph({
+              children: [
+                new TextRun({
+                  text: 'GIỚI THIỆU',
+                  bold: true,
+                  size: 28,
+                  font: 'Arial',
+                }),
+              ],
+              alignment: AlignmentType.LEFT,
+              spacing: { before: 400, after: 200 },
+              pageBreakBefore: true,
+            }),
+            new Paragraph({
+              children: [
+                new TextRun({
+                  text: `Báo cáo này cung cấp thông tin chi tiết về ${report.Type.toLowerCase()} của Công ty Vật tư Xây dựng XYZ trong khoảng thời gian được chỉ định. Mục tiêu của báo cáo là tổng hợp và phân tích dữ liệu để hỗ trợ việc ra quyết định và đánh giá hiệu quả hoạt động. Nội dung bao gồm thông tin cơ bản, dữ liệu chi tiết, số liệu bổ sung và các khuyến nghị (nếu có).`,
+                  size: 22,
+                  font: 'Arial',
+                }),
+              ],
+              alignment: AlignmentType.JUSTIFIED,
+              spacing: { after: 200 },
+            }),
+            new Paragraph({
+              children: [
+                new TextRun({
+                  text: `Báo cáo được lập bởi ${report.Author} vào ngày ${new Date(report.Created_at).toLocaleDateString('vi-VN')}, cập nhật lần cuối vào ngày ${new Date(report.LastUpdated).toLocaleDateString('vi-VN')}.`,
+                  size: 22,
+                  font: 'Arial',
+                }),
+              ],
+              alignment: AlignmentType.JUSTIFIED,
+              spacing: { after: 400 },
+            }),
+            // Thông tin cơ bản
+            new Paragraph({
+              children: [
+                new TextRun({
+                  text: 'THÔNG TIN CƠ BẢN',
+                  bold: true,
+                  size: 28,
+                  font: 'Arial',
+                }),
+              ],
+              alignment: AlignmentType.LEFT,
+              spacing: { before: 400, after: 200 },
+            }),
+            createTable(
+              ['Thông tin', 'Giá trị'],
+              [
+                ['Mã báo cáo', report.ReportID],
+                ['Loại báo cáo', report.Type],
+                ['Ngày tạo', new Date(report.Created_at).toLocaleDateString('vi-VN')],
+                ['Ngày cập nhật cuối', new Date(report.LastUpdated).toLocaleDateString('vi-VN')],
+                ['Người tạo', report.Author],
+                ['Mô tả', report.Details],
+                ['Ghi chú', report.Notes || 'Không có'],
+                ['Tóm tắt', report.Content.summary],
+              ]
+            ),
+            // Nội dung báo cáo
+            new Paragraph({
+              children: [
+                new TextRun({
+                  text: 'NỘI DUNG BÁO CÁO',
+                  bold: true,
+                  size: 28,
+                  font: 'Arial',
+                }),
+              ],
+              alignment: AlignmentType.LEFT,
+              spacing: { before: 400, after: 200 },
+            }),
+            report.Type === 'Doanh thu'
+              ? createTable(
+                  ['Sản phẩm', 'Danh mục', 'Doanh thu (VNĐ)', 'Số lượng bán', 'Giá mỗi đơn vị (VNĐ)'],
+                  report.Content.data.map((item) => [
+                    item.product,
+                    item.category,
+                    item.revenue.toLocaleString('vi-VN'),
+                    item.unitsSold.toLocaleString('vi-VN'),
+                    item.pricePerUnit.toLocaleString('vi-VN'),
+                  ])
+                )
+              : report.Type === 'Tồn kho' || report.Type === 'Nhập kho' || report.Type === 'Xuất kho'
+              ? createTable(
+                  report.Type === 'Tồn kho'
+                    ? ['Sản phẩm', 'Danh mục', 'Số lượng', 'Vị trí', 'Nhà cung cấp', 'Trạng thái']
+                    : ['Sản phẩm', 'Danh mục', 'Số lượng', 'Vị trí', 'Nhà cung cấp', 'Trạng thái', 'Ngày'],
+                  report.Content.data.map((item) => {
+                    const row = [
+                      item.product,
+                      item.category,
+                      item.quantity.toLocaleString('vi-VN'),
+                      item.location,
+                      item.supplier,
+                      item.status,
+                    ];
+                    if (report.Type !== 'Tồn kho') row.push(new Date(item.date).toLocaleDateString('vi-VN'));
+                    return row;
+                  })
+                )
+              : createTable(
+                  ['Mã đơn hàng', 'Khách hàng', 'Tổng tiền (VNĐ)', 'Trạng thái', 'Số lượng sản phẩm'],
+                  report.Content.data.map((item) => [
+                    item.orderId,
+                    item.customer,
+                    item.total.toLocaleString('vi-VN'),
+                    item.status,
+                    item.items.reduce((sum, i) => sum + i.quantity, 0).toLocaleString('vi-VN'),
+                  ])
+                ),
+            // Số liệu bổ sung
+            new Paragraph({
+              children: [
+                new TextRun({
+                  text: 'SỐ LIỆU BỔ SUNG',
+                  bold: true,
+                  size: 28,
+                  font: 'Arial',
+                }),
+              ],
+              alignment: AlignmentType.LEFT,
+              spacing: { before: 400, after: 200 },
+            }),
+            createTable(
+              ['Chỉ số', 'Giá trị'],
+              report.Content.additionalMetrics.map((metric) => [metric.key, metric.value])
+            ),
+            // Chi tiết sản phẩm trong đơn hàng (nếu có)
+            ...(report.Type === 'Đơn hàng'
+              ? report.Content.data.flatMap((order) => [
+                  new Paragraph({
+                    children: [
+                      new TextRun({
+                        text: `CHI TIẾT ĐƠN HÀNG #${order.orderId}`,
+                        bold: true,
+                        size: 28,
+                        font: 'Arial',
+                      }),
+                    ],
+                    alignment: AlignmentType.LEFT,
+                    spacing: { before: 400, after: 200 },
+                  }),
+                  createTable(
+                    ['Sản phẩm', 'Số lượng', 'Giá (VNĐ)', 'Tổng giá (VNĐ)'],
+                    order.items.map((item) => [
+                      item.product,
+                      item.quantity.toLocaleString('vi-VN'),
+                      item.price.toLocaleString('vi-VN'),
+                      (item.quantity * item.price).toLocaleString('vi-VN'),
+                    ])
+                  ),
+                ])
+              : []),
+            // Phần kết luận
+            new Paragraph({
+              children: [
+                new TextRun({
+                  text: 'KẾT LUẬN',
+                  bold: true,
+                  size: 28,
+                  font: 'Arial',
+                }),
+              ],
+              alignment: AlignmentType.LEFT,
+              spacing: { before: 400, after: 200 },
+            }),
+            new Paragraph({
+              children: [
+                new TextRun({
+                  text: `Báo cáo ${report.Type.toLowerCase()} này cung cấp cái nhìn tổng quan về tình hình ${report.Type.toLowerCase()} của Công ty Vật tư Xây dựng XYZ. Dựa trên dữ liệu, chúng tôi nhận thấy ${report.Content.summary}. Để cải thiện hiệu quả hoạt động, đề xuất tập trung vào các sản phẩm có tỷ lệ tăng trưởng cao (nếu là báo cáo doanh thu) hoặc bổ sung tồn kho kịp thời (nếu là báo cáo tồn kho). Các đơn hàng cần được xử lý nhanh chóng để đảm bảo tỷ lệ hoàn thành cao.`,
+                  size: 22,
+                  font: 'Arial',
+                }),
+              ],
+              alignment: AlignmentType.JUSTIFIED,
+              spacing: { after: 200 },
+            }),
+            // Ghi công và thông tin liên hệ
+            new Paragraph({
+              children: [
+                new TextRun({
+                  text: 'GHI CÔNG VÀ THÔNG TIN LIÊN HỆ',
+                  bold: true,
+                  size: 28,
+                  font: 'Arial',
+                }),
+              ],
+              alignment: AlignmentType.LEFT,
+              spacing: { before: 400, after: 200 },
+            }),
+            new Paragraph({
+              children: [
+                new TextRun({
+                  text: 'Chúng tôi xin cảm ơn đội ngũ nhân viên đã cung cấp dữ liệu và hỗ trợ lập báo cáo này. Mọi thắc mắc hoặc yêu cầu bổ sung thông tin, vui lòng liên hệ:',
+                  size: 22,
+                  font: 'Arial',
+                }),
+              ],
+              alignment: AlignmentType.JUSTIFIED,
+              spacing: { after: 200 },
+            }),
+            new Paragraph({
+              children: [
+                new TextRun({
+                  text: 'Công ty Vật tư Xây dựng XYZ',
+                  size: 22,
+                  font: 'Arial',
+                }),
+              ],
+              alignment: AlignmentType.LEFT,
+              spacing: { after: 100 },
+            }),
+            new Paragraph({
+              children: [
+                new TextRun({
+                  text: 'Địa chỉ: 123 Đường Lê Lợi, Quận 1, TP. Hồ Chí Minh',
+                  size: 22,
+                  font: 'Arial',
+                }),
+              ],
+              alignment: AlignmentType.LEFT,
+              spacing: { after: 100 },
+            }),
+            new Paragraph({
+              children: [
+                new TextRun({
+                  text: 'Email: contact@xyzconstruction.com',
+                  size: 22,
+                  font: 'Arial',
+                }),
+              ],
+              alignment: AlignmentType.LEFT,
+              spacing: { after: 100 },
+            }),
+            new Paragraph({
+              children: [
+                new TextRun({
+                  text: 'Điện thoại: (028) 1234 5678',
+                  size: 22,
+                  font: 'Arial',
+                }),
+              ],
+              alignment: AlignmentType.LEFT,
+              spacing: { after: 400 },
+            }),
+          ],
+        },
+      ],
+    });
 
-    // Sheet 4: Chi tiết sản phẩm trong đơn hàng (chỉ cho báo cáo Đơn hàng)
-    if (report.Type === 'Đơn hàng') {
-      report.Content.data.forEach((order, index) => {
-        const orderItemsHeaders = ['Sản phẩm', 'Số lượng', 'Giá (VNĐ)', 'Tổng giá (VNĐ)'];
-        const orderItemsRows = order.items.map((item) => [
-          item.product,
-          item.quantity,
-          item.price,
-          item.quantity * item.price,
-        ]);
-        const ws4 = XLSX.utils.aoa_to_sheet([[`Đơn hàng #${order.orderId}`], orderItemsHeaders, ...orderItemsRows]);
-        XLSX.utils.book_append_sheet(wb, ws4, `Đơn hàng ${order.orderId}`);
-      });
-    }
-
-    // Tạo và tải file Excel
-    const fileName = `Report_${report.ReportID}_${report.Type}_${report.Created_at}.xlsx`;
-    XLSX.writeFile(wb, fileName);
+    // Tạo và tải file Word
+    Packer.toBlob(doc).then((blob) => {
+      saveAs(blob, `Report_${report.ReportID}_${report.Type}_${report.Created_at}.docx`);
+    }).catch((err) => {
+      console.error('Lỗi khi tạo file Word:', err);
+    });
   };
 
   return (
@@ -353,10 +737,10 @@ const ReportList = () => {
                     Xem
                   </Link>
                   <button
-                    onClick={() => exportToExcel(report)}
+                    onClick={() => exportToWord(report)}
                     className="bg-green-500 text-white px-2 py-1 rounded hover:bg-green-600 ml-2"
                   >
-                    Xuất Excel
+                    Xuất Word
                   </button>
                 </td>
               </tr>
