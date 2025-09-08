@@ -6,8 +6,11 @@ from .admin.manage_serializer import CustomerSupplierUserSerializer,ProductSeria
 from .admin.report import StockReportSerializer,ReportRevenueSerializer
 from .admin.purchase_serializer import PaymentPurchaseCreateSerializer,ProductSerializer,PurchaseSerializer,\
 PurchaseDetailSerializer,InventorySerializer,CreatePurchaseSerializer
+from .admin.inventory_serializer import InventorySerializer,InventoryDetailSerializer
 # supplier
 from .supplier.prosal_product import ProposalProductSerializer,ProposalProductAdminSerializer
 from .supplier.main import OrderDetailSerializer,HistoryStockSerializer
+from .supplier.manage_product_serializer import ProductSupplierSerializer
+from .supplier.manage_purchase_serializer import PurchaseSerializer,PurchaseDetailSerializer
 # customer
 from .customer.cart_serializer import CartItemSerializer,CartSerializer

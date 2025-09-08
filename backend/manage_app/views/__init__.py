@@ -9,9 +9,14 @@ from .admin.report import ReportViewSet,ReportRevenueViewSet
 from .admin.prosal_product import ProposalProductAdminViewSet
 from .admin.manage_cate import CategoryViewSet
 from .admin.purchase.purchase import PaymentPurchaseCreateView,PurchaseCreateView
+from .admin.inventory import InventoryViewSet
 # supplier
 from .supplier.prosal_product import ProposalProductViewSet
 from .supplier.main import OrderDetailViewSet,HistoryStockViewSet
+from .supplier.mana_product import ProductSupplierViewSet
+from .supplier.manage_purchase import ManagePurchaseViewSet
 # customer
 from .customer.cart import CartViewSet
 from .auth.auth_view import UpdateUserView,ChangePasswordView
+# function
+from .function.search import SearchbyLocationViewSet,CombinedSearchViewSet

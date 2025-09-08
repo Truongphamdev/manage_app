@@ -90,6 +90,7 @@ class Purchase(models.Model):
     purchase_date = models.DateTimeField(auto_now_add=True)
     total_amount = models.DecimalField(max_digits=12, decimal_places=2)
 
+
     def __str__(self):
         return f"Purchase {self.purchaseID} - {self.supplier.full_name}"
 class PurchaseDetail(models.Model):
@@ -187,6 +188,10 @@ class InvoiceOrder(models.Model):
     def __str__(self):
         return f"Invoice {self.id} - {self.order.customer.full_name} - {self.total_amount}"
 
+    def save(self, *args, **kwargs):
+        if not self.invoice_number:
+            self.invoice_number = f"INV-{uuid.uuid4().hex[:10].upper()}"
+        super().save(*args, **kwargs)
 class InvoicePurchase(models.Model):
     id = models.AutoField(primary_key=True)
     purchase = models.ForeignKey(Purchase, on_delete=models.CASCADE)
@@ -230,6 +235,11 @@ class PaymentOrder(models.Model):
         ("failed", "Failed"),
     ), default="pending")
 
+    def save(self, *args, **kwargs):
+        if not self.transaction_id:
+            self.transaction_id = f"TRANS-{uuid.uuid4().hex[:10].upper()}"
+        super().save(*args, **kwargs)
+
 # paymentpurchase
 class PaymentPurchase(models.Model):
     id = models.AutoField(primary_key=True)
@@ -246,6 +256,10 @@ class PaymentPurchase(models.Model):
         ("completed", "Completed"),
         ("failed", "Failed"),
     ), default="pending")
+    def save(self, *args, **kwargs):
+        if not self.transaction_id:
+            self.transaction_id = f"TRANS-{uuid.uuid4().hex[:10].upper()}"
+        super().save(*args, **kwargs)
 
 # bảng cart
 class Cart(models.Model):
