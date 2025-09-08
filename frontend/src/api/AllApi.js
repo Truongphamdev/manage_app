@@ -20,6 +20,10 @@ const All_Api = {
     updateProduct: (id, data) => axiosClient.put(`/admin/products/${id}/`, data),
     deleteProduct: (id) => axiosClient.delete(`/admin/products/${id}/`),
     getFormdata: () => axiosClient.get('/admin/products/form-data/'),
+// inventory
+    getInventory: () => axiosClient.get('/admin/inventory/'),
+    getInventoryById: (id) => axiosClient.get(`/admin/inventory/${id}/`),
+    
     // admin purchase
     createPurchase: (data) => axiosClient.post('/admin/purchase/', data),
     getPurchaseById: (id) => axiosClient.get(`/admin/purchase/${id}/`),
@@ -30,6 +34,14 @@ const All_Api = {
     updateUserProfile: (data) => axiosClient.put('/auth/user/update/', data),
     changePassword: (data) => axiosClient.post('/auth/user/change-password/', data),
     // supplier
-
-}   
+    getSupplierProducts: () => axiosClient.get('/supplier/products/'),
+    getSupplierProductById: (id) => axiosClient.get(`/supplier/products/${id}/`),
+    // manage purchase
+    getPurchases: () => axiosClient.get('/supplier/purchases/'),
+    getPurchaseDetailById: (id) => axiosClient.get(`/supplier/purchases/${id}/`),
+    // search
+    searchByLocation: (params) => axiosClient.get('/function/search/location/', { params }),
+    // kết hợp nhiều tiêu chí tìm kiếm
+    combinedSearch: (params) => axiosClient.get('/function/search/combined/', { params }),
+}
 export default All_Api;

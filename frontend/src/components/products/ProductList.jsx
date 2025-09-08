@@ -1,7 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { use, useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import All_Api from '../../api/AllApi';
 import PurchaseForm from './purchase/AddPurchase';
+import UpdateProductForm from './UpdateProductForm';
+import AddProductForm from './AddProduct';
+import { Filter } from './Filter';
 const ProductList = () => {
   const [formData, setFormData] = React.useState(
     { name:'',
@@ -16,11 +19,12 @@ const ProductList = () => {
   const [products, setProducts] = React.useState([]);
   const [suppliers,setSuppliers] = useState([]);
   const [categories,setCategories] = useState([]);
-  const [errors,setErrors] = useState(null);
   const [showAddProductForm, setShowAddProductForm] = useState(false);
   const [showUpdateProductForm, setShowUpdateProductForm] = useState(false);
+  const [showFilter, setShowFilter] = useState(false);
   const [editProductId, setEditProductId] = useState(null);
-  const [previewImage, setPreviewImage] = useState(null);
+  const [errors, setErrors] = useState(null);
+  const [filterParams, setFilterParams] = useState({});
   const initFormdata = {
     name: '',
     image: '',
@@ -54,6 +58,37 @@ const ProductList = () => {
   "Cặp",
   "Bao"
 ];
+const [search, setSearch] = useState('');
+useEffect(() => {
+  const handleSearch = async () => {
+    const params = {...filterParams}
+    if (search) params.search = search;
+    console.log("Combined params:", params);
+    if (Object.keys(params).length === 0) {
+      getProducts(); // Nếu không có từ khóa tìm kiếm, lấy tất cả sản phẩm
+      return;
+    }
+
+    try {
+    const response = await All_Api.combinedSearch(params);
+    console.log("Kết quả tìm kiếm:", response);
+      setProducts(response);
+    } catch (error) {
+      console.error("Error searching products:", error);
+      setErrors(error?.response?.data);
+    }
+  }
+  // debounce search
+  const timeoutId = setTimeout(() => {
+    handleSearch();
+  }, 400);
+
+  return () => clearTimeout(timeoutId);
+}, [search, filterParams]);
+
+const handleFilter = (params) => {
+  setFilterParams(params);  
+};
 // lấy dữ liệu cho các trường trong form
   const getFormData  = async() => {
     try {
@@ -66,9 +101,7 @@ const ProductList = () => {
       setErrors(error?.response?.data)
     }
   };
-  const handleProductChange = (e) => {
-    setFormData({...formData, [e.target.name]: e.target.value });
-  }
+
   // lấy dữ liệu cho các sản phẩm
   const getProducts = async() => {
     try {
@@ -79,45 +112,8 @@ const ProductList = () => {
       setErrors(error?.response?.data);
     }
   }
-  // xử lý đường dẫn ảnh
-  const handleImageURL = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setFormData({ ...formData, image: file });
-    if (previewImage) {
-        URL.revokeObjectURL(previewImage);
-    }
-    else {
-      setPreviewImage(URL.createObjectURL(file));
-    }
-    }
-  }
-  // xử lý thêm sản phẩm
-  const handleAddProduct = async (e) => {
-    e.preventDefault();
-    const data = new FormData();
-    data.append("name", formData.name);
-    if (formData.image instanceof File) {
-      data.append("image", formData.image);
-    }
-    data.append("category", formData.category);
-    formData.suppliers.forEach(id => data.append("suppliers", id));
-    data.append("price", formData.price);
-    data.append("unit", formData.unit);
-    try {
-      const response = await All_Api.createProduct(data);
-      getProducts();
-      setShowAddProductForm(false);
-      setFormData(initFormdata);
-      setErrors(null);
-      setPreviewImage(null);
-      console.log("Thêm sản phẩm thành công:", response);
-      window.alert("Thêm sản phẩm thành công")
-    } catch (error) {
-        console.log("Lỗi chi tiết:", error.response?.data);
-      setErrors(error?.response?.data);
-    }
-  };
+
+
   // xử lý xóa sản phẩm
   const handleDeleteProduct = async (productId) => {
     const confirmDelete = window.confirm("Bạn có chắc chắn muốn xóa sản phẩm này?");
@@ -133,57 +129,60 @@ const ProductList = () => {
       setErrors(error?.response?.data);
     }
   };
-  // edit product
   const handleEditProduct = async (ProductID) => {
-    const response = await All_Api.getProductById(ProductID);
-    console.log("dữ liệu sản phẩm cần sửa",response)
-    setEditProductId(response);
-    setShowUpdateProductForm(true);
-  }
-  const handleUpdateProduct = async (e) => {
-    e.preventDefault();
-    const data = new FormData();
-    data.append("name", editProductId.name);
-    if (editProductId.image instanceof File) {
-      data.append("image", editProductId.image);
-    }
-    data.append("category", editProductId.category?.CategoryID);
-    editProductId.suppliers.forEach(sup => data.append('suppliers', sup.SupplierID));
-    data.append("price", editProductId.price);
-    data.append("unit", editProductId.unit);
-    data.append("quantity_stock", Number(editProductId.quantity_stock));
     try {
-      const response = await All_Api.updateProduct(editProductId.ProductID, data);
-      getProducts();
-      setShowUpdateProductForm(false);
-      setEditProductId(initFormdata);
-      setErrors(null);
-      setPreviewImage(null);
-      console.log("Cập nhật sản phẩm thành công:", response);
-      window.alert("Cập nhật sản phẩm thành công");
+      const response = await All_Api.getProductById(ProductID);
+      setEditProductId(response);
+      setShowUpdateProductForm(true);
     } catch (error) {
-      console.log("Lỗi chi tiết:", error.response?.data);
       setErrors(error?.response?.data);
     }
   };
-  // dữ liệu edit
-  console.log("editProductId",editProductId)
   return (
     <>
-      <div className="flex justify-between mb-6">
-        <button
-          className="px-4 py-2 bg-orange-600 text-white font-medium rounded-lg shadow hover:bg-orange-700 transition"
-          onClick={() => setShowAddProductForm(true)}
-        >
-          + Thêm sản phẩm
-        </button>
-            <button
-          className="px-4 py-2 bg-orange-600 text-white font-medium rounded-lg shadow hover:bg-orange-700 transition"
-          onClick={() => navigate('/admin/purchase',{state:{suppliers, DataProducts:products, locations}})}
-        >
-          + Nhập Hàng
-        </button>
-      </div>
+<div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+  {/* Nhóm bên trái */}
+  <div className="flex flex-col sm:flex-row gap-4">
+    <button
+      className="px-4 py-2 bg-orange-600 text-white font-medium rounded-lg shadow hover:bg-orange-700 transition"
+      onClick={() => setShowAddProductForm(true)}
+    >
+      + Thêm sản phẩm
+    </button>
+
+    <button onClick={() => setShowFilter(true)} className="px-4 py-2 bg-sky-500 text-white font-medium rounded-lg shadow hover:bg-sky-600 transition">
+      🔍 Lọc nâng cao
+      
+    </button>
+  </div>
+
+  {/* Ô tìm kiếm */}
+  <div className="flex-1">
+    <input
+      type="text"
+      placeholder="Tìm kiếm sản phẩm..."
+      value={search}
+      onChange={(e) => setSearch(e.target.value)}
+      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+    />
+  </div>
+
+  {/* Nhóm bên phải */}
+  <div>
+    <button
+      className="px-4 py-2 bg-orange-600 text-white font-medium rounded-lg shadow hover:bg-orange-700 transition w-full sm:w-auto"
+      onClick={() =>
+        navigate('/admin/purchase', {
+          state: { suppliers, DataProducts: products, locations },
+        })
+      }
+    >
+      + Nhập Hàng
+    </button>
+  </div>
+</div>
+
+
 
 <div>
 {products.length > 0 ? (
@@ -249,306 +248,33 @@ const ProductList = () => {
 )}
 
 
-      {showAddProductForm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 px-2">
-          <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-4 sm:p-6 relative max-h-screen sm:max-h-[80vh] overflow-y-auto">
-            <h2 className="text-xl sm:text-2xl font-bold mb-4 text-center text-blue-600">
-              Thêm sản phẩm
-            </h2>
-            <form className="space-y-4" onSubmit={handleAddProduct}>
-              <div>
-                <label className="block font-medium mb-1">Tên sản phẩm</label>
-                <input
-                  required
-                  type="text"
-                  name="name"
-                  className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  value={formData.name}
-                  onChange={handleProductChange}
-                  placeholder="Tên sản phẩm"
-                />
-                {errors?.name && (
-                  <p className="text-red-500 text-sm">{errors.name[0]}</p>
-                )}
-              </div>
-              <div>
-                <label className="block font-medium mb-1">Ảnh sản phẩm</label>
-                <input
-                  required
-                  type="file"
-                  name="image"
-                  className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  onChange={handleImageURL}
-                  placeholder="Ảnh sản phẩm"
-                />
-                {previewImage && (
-                  <img
-                    src={previewImage}
-                    alt="Preview"
-                    className="mt-2 w-full h-48 object-cover rounded-md"
-                  />
-                )}
-                {errors?.image && (
-                  <p className="text-red-500 text-sm">{errors.image[0]}</p>
-                )}
-              </div>
-              <div>
-                <label className="block font-medium mb-1">Thể loại</label>
-                  <select
-                    required
-                    name="category"
-                    className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    value={formData.category}
-                    onChange={handleProductChange}
-                  >
-                    <option value="">Chọn thể loại</option>
-                    {categories.map((cat) => (
-                      <option key={cat?.CategoryID || cat} value={cat?.CategoryID}>
-                        {cat?.name || cat}
-                      </option>
-                    ))}
-                  </select>
-                {errors?.category && (
-                  <p className="text-red-500 text-sm">{errors.category[0]}</p>
-                )}
-              </div>
-              <div>
-                <label className="block font-medium mb-1">Nhà cung cấp</label>
-                  <select
-                    required
-                    name="suppliers"
-                    multiple
-                    className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    value={formData.suppliers || []}
-                    onChange={e => {
-                      const selected = Array.from(e.target.selectedOptions, option => Number(option.value));
-                      setFormData({ ...formData, suppliers: selected });
-                    }}
-                  >
-                    {suppliers.map((sup) => (
-                      <option key={sup?.SupplierID || sup} value={sup?.SupplierID}>
-                        {sup?.full_name + ' (' + sup?.company_name + ')' || sup}
-                      </option>
-                    ))}
-                  </select>
-                {errors?.suppliers && (
-                  <p className="text-red-500 text-sm">{errors.suppliers[0]}</p>
-                )}
-              </div>
-              <div>
-                <label className="block font-medium mb-1">Giá bán</label>
-                <input
-                  required
-                  type="number"
-                  name="price"
-                  className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  value={formData.price}
-                  onChange={handleProductChange}
-                  placeholder="Giá bán"
-                />
-                {errors?.price && (
-                  <p className="text-red-500 text-sm">{errors.price[0]}</p>
-                )}
-              </div>
-              <div>
-                <label className="block font-medium mb-1">Đơn vị</label>
-                <select
-                  required
-                  name="unit"
-                  className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  value={formData.unit}
-                  onChange={handleProductChange}
-                >
-                  <option value="">Chọn đơn vị</option>
-                  {units.map((unit) => (
-                    <option key={unit} value={unit}>
-                      {unit}
-                    </option>
-                  ))}
-                </select>
-                {errors?.unit && (
-                  <p className="text-red-500 text-sm">{errors.unit[0]}</p>
-                )}
-              </div>
-              <div className="mt-4">
-                <button
-                  type="submit"
-                  className="w-full bg-blue-600 text-white rounded px-4 py-2 hover:bg-blue-700"
-                >
-                  Thêm sản phẩm
-                </button>
-                <button
-                  type="button"
-                  className="bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300 mt-4"
-                  onClick={() => setShowAddProductForm(false)}
-                >
-                  Đóng
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+
+      <AddProductForm
+        show={showAddProductForm}
+        onClose={() => setShowAddProductForm(false)}
+        onSuccess={getProducts}
+        categories={categories}
+        suppliers={suppliers}
+        units={units}
+      />
       
-      {showUpdateProductForm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 px-2">
-          <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-4 sm:p-6 relative max-h-screen sm:max-h-[80vh] overflow-y-auto">
-            <h2 className="text-xl sm:text-2xl font-bold mb-4 text-center text-blue-600">
-              Cập nhật sản phẩm
-            </h2>
-            <form className="space-y-4" onSubmit={handleUpdateProduct}>
-              <div>
-                <label className="block font-medium mb-1">Tên sản phẩm</label>
-                <input
-                  required
-                  type="text"
-                  name="name"
-                  className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  value={editProductId.name}
-                  onChange={e => setEditProductId({ ...editProductId, name: e.target.value })}
-                  placeholder="Tên sản phẩm"
-                />
-                {errors?.name && (
-                  <p className="text-red-500 text-sm">{errors.name[0]}</p>
-                )}
-              </div>
-              <div>
-                <label className="block font-medium mb-1">Ảnh sản phẩm</label>
-                <input
-                  type="file"
-                  name="image"
-                  className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  onChange={e => {
-                    const file = e.target.files[0];
-                    if (file) {
-                      setPreviewImage(URL.createObjectURL(file));
-                      setEditProductId({ ...editProductId, image: file });
-                    }
-                  }}
-                  placeholder="Ảnh sản phẩm"
-                />
-                {editProductId.image && (
-                  <img
-                    src={editProductId.image instanceof File ? previewImage : editProductId.image}
-                    alt="Preview"
-                    className="mt-2 w-full h-48 object-cover rounded-md"
-                  />
-                )}
-                {errors?.image && (
-                  <p className="text-red-500 text-sm">{errors.image[0]}</p>
-                )}
-              </div>
-              <div>
-                <label className="block font-medium mb-1">Thể loại</label>
-                  <select
-                    required
-                    name="category"
-                    className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    value={editProductId.category?.CategoryID}
-                    onChange={e => setEditProductId({ ...editProductId, category: { ...editProductId.category, CategoryID: e.target.value } })}>
-                    <option value="">Chọn thể loại</option>
-                    {categories.map((cat) => (
-                      <option key={cat?.CategoryID || cat} value={cat?.CategoryID}>
-                        {cat?.name || cat}
-                      </option>
-                    ))}
-                  </select>
-                {errors?.category && (
-                  <p className="text-red-500 text-sm">{errors.category[0]}</p>
-                )}
-              </div>
-              <div>
-                <label className="block font-medium mb-1">Nhà cung cấp</label>
-                  <select
-                    required
-                    name="suppliers"
-                    multiple
-                    className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    value={editProductId.suppliers?.map(sup => sup.SupplierID) || []}
-                    onChange={e => {
-                      const selected = Array.from(e.target.selectedOptions, option => Number(option.value));
-                      setEditProductId({ ...editProductId, suppliers: suppliers.filter(sup => selected.includes(sup.SupplierID))});
-                    }}
-                  >
-                    {suppliers.map((sup) => (
-                      <option key={sup?.SupplierID || sup} value={sup?.SupplierID}>
-                        {sup?.full_name + ' (' + sup?.company_name + ')' || sup}
-                      </option>
-                    ))}
-                  </select>
-                {errors?.suppliers && (
-                  <p className="text-red-500 text-sm">{errors.suppliers[0]}</p>
-                )}
-              </div>
-              <div>
-                <label className="block font-medium mb-1">Giá bán</label>
-                <input
-                  required
-                  type="number"
-                  name="price"
-                  className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  value={editProductId.price}
-                  onChange={e => setEditProductId({ ...editProductId, price: e.target.value })}
-                  placeholder="Giá bán"
-                />
-                {errors?.price && (
-                  <p className="text-red-500 text-sm">{errors.price[0]}</p>
-                )}
-              </div>
-              <div>
-                <label className="block font-medium mb-1">Đơn vị</label>
-                <select
-                  required
-                  name="unit"
-                  className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  value={editProductId.unit}
-                  onChange={e => setEditProductId({ ...editProductId, unit: e.target.value })}
-                >
-                  <option value="">Chọn đơn vị</option>
-                  {units.map((unit) => (
-                    <option key={unit} value={unit}>
-                      {unit}
-                    </option>
-                  ))}
-                </select>
-                {errors?.unit && (
-                  <p className="text-red-500 text-sm">{errors.unit[0]}</p>
-                )}
-              </div>
-              <div>
-                <label className="block font-medium mb-1">Số lượng tồn kho</label>
-                <input
-                  required
-                  type="number"
-                  name="quantity_stock"
-                  className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  value={editProductId.quantity_stock}
-                  onChange={e => setEditProductId({ ...editProductId, quantity_stock: e.target.value })}
-                  placeholder="Số lượng tồn kho"
-                />
-                {errors?.quantity_stock && (
-                  <p className="text-red-500 text-sm">{errors.quantity_stock[0]}</p>
-                )}
-              </div>
-              <div className="mt-4">
-                <button
-                  type="submit"
-                  className="w-full bg-blue-600 text-white rounded px-4 py-2 hover:bg-blue-700"
-                >
-                  Cập nhật sản phẩm
-                </button>
-                <button
-                  type="button"
-                  className="bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300 mt-4"
-                  onClick={() => setShowUpdateProductForm(false)}
-                >
-                  Đóng
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+      <UpdateProductForm
+        show={showUpdateProductForm}
+        onClose={() => setShowUpdateProductForm(false)}
+        onSuccess={getProducts}
+        product={editProductId}
+        categories={categories}
+        suppliers={suppliers}
+        units={units}
+      />
+      <Filter
+      show={showFilter}
+        suppliers={suppliers}
+        categories={categories}
+        locations={locations}
+        onFilter={handleFilter}
+        onclose={() => setShowFilter(false)} 
+      />
     </div>
         </>
   );
