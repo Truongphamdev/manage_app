@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React from 'react';
+import { Link } from 'react-router-dom';
 
 const CustomerProfile = () => {
-  const [profile, setProfile] = useState({
+  const profile = {
     name: 'Nguyễn Văn A',
     email: 'nguyenvana@example.com',
     phone: '0901234567',
@@ -12,135 +13,59 @@ const CustomerProfile = () => {
     createdAt: '2025-01-01',
     updatedAt: '2025-09-01',
     status: 'Hoạt động',
-  });
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setProfile((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    // Logic để lưu thông tin, ví dụ: gọi API
-    alert('Thông tin đã được cập nhật!');
   };
 
   return (
     <div className="bg-white p-6 rounded-lg shadow">
       <h2 className="text-xl font-semibold mb-4">Thông tin cá nhân</h2>
-      <form onSubmit={handleSubmit}>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium mb-1">Họ và tên</label>
-            <input
-              type="text"
-              name="name"
-              value={profile.name}
-              onChange={handleChange}
-              className="w-full p-2 border rounded"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">Email</label>
-            <input
-              type="email"
-              name="email"
-              value={profile.email}
-              onChange={handleChange}
-              className="w-full p-2 border rounded"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">Số điện thoại</label>
-            <input
-              type="tel"
-              name="phone"
-              value={profile.phone}
-              onChange={handleChange}
-              className="w-full p-2 border rounded"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">Địa chỉ</label>
-            <input
-              type="text"
-              name="address"
-              value={profile.address}
-              onChange={handleChange}
-              className="w-full p-2 border rounded"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">Ngày sinh</label>
-            <input
-              type="date"
-              name="dob"
-              value={profile.dob}
-              onChange={handleChange}
-              className="w-full p-2 border rounded"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">Giới tính</label>
-            <select
-              name="gender"
-              value={profile.gender}
-              onChange={handleChange}
-              className="w-full p-2 border rounded"
-            >
-              <option value="Nam">Nam</option>
-              <option value="Nữ">Nữ</option>
-              <option value="Khác">Khác</option>
-            </select>
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">CMND/CCCD</label>
-            <input
-              type="text"
-              name="idNumber"
-              value={profile.idNumber}
-              onChange={handleChange}
-              className="w-full p-2 border rounded"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">Trạng thái</label>
-            <input
-              type="text"
-              name="status"
-              value={profile.status}
-              disabled
-              className="w-full p-2 border rounded bg-gray-100"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">Ngày tạo</label>
-            <input
-              type="text"
-              name="createdAt"
-              value={profile.createdAt}
-              disabled
-              className="w-full p-2 border rounded bg-gray-100"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">Ngày cập nhật</label>
-            <input
-              type="text"
-              name="updatedAt"
-              value={profile.updatedAt}
-              disabled
-              className="w-full p-2 border rounded bg-gray-100"
-            />
-          </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm font-medium mb-1">Họ và tên</label>
+          <p className="w-full p-2 border rounded bg-gray-100">{profile.name}</p>
         </div>
-        <button
-          type="submit"
-          className="mt-4 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-        >
-          Cập nhật
-        </button>
-      </form>
+        <div>
+          <label className="block text-sm font-medium mb-1">Email</label>
+          <p className="w-full p-2 border rounded bg-gray-100">{profile.email}</p>
+        </div>
+        <div>
+          <label className="block text-sm font-medium mb-1">Số điện thoại</label>
+          <p className="w-full p-2 border rounded bg-gray-100">{profile.phone}</p>
+        </div>
+        <div>
+          <label className="block text-sm font-medium mb-1">Địa chỉ</label>
+          <p className="w-full p-2 border rounded bg-gray-100">{profile.address}</p>
+        </div>
+        <div>
+          <label className="block text-sm font-medium mb-1">Ngày sinh</label>
+          <p className="w-full p-2 border rounded bg-gray-100">{profile.dob}</p>
+        </div>
+        <div>
+          <label className="block text-sm font-medium mb-1">Giới tính</label>
+          <p className="w-full p-2 border rounded bg-gray-100">{profile.gender}</p>
+        </div>
+        <div>
+          <label className="block text-sm font-medium mb-1">CMND/CCCD</label>
+          <p className="w-full p-2 border rounded bg-gray-100">{profile.idNumber}</p>
+        </div>
+        <div>
+          <label className="block text-sm font-medium mb-1">Trạng thái</label>
+          <p className="w-full p-2 border rounded bg-gray-100">{profile.status}</p>
+        </div>
+        <div>
+          <label className="block text-sm font-medium mb-1">Ngày tạo</label>
+          <p className="w-full p-2 border rounded bg-gray-100">{profile.createdAt}</p>
+        </div>
+        <div>
+          <label className="block text-sm font-medium mb-1">Ngày cập nhật</label>
+          <p className="w-full p-2 border rounded bg-gray-100">{profile.updatedAt}</p>
+        </div>
+      </div>
+      <Link
+        to="/customer/profile/edit"
+        className="mt-4 inline-block bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+      >
+        Sửa thông tin
+      </Link>
     </div>
   );
 };

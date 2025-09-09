@@ -35,6 +35,9 @@ import CustomerOrderList from './components/customer/orders/CustomerOrderList';
 import CustomerOrderDetail from './components/customer/orders/CustomerOrderDetail';
 import CustomerPaymentList from './components/customer/payments/CustomerPaymentList';
 import CustomerProfile from './components/customer/profile/CustomerProfile';
+import CustomerProfileEdit from './components/customer/profile/CustomerProfileEdit';
+import SupplierProfile from './components/supplier/profile/SupplierProfile';
+import SupplierProfileEdit from './components/supplier/profile/SupplierProfileEdit';
 import { UserProvider } from './api/context/UserContext';
 import PurchaseForm from './components/products/purchase/AddPurchase';
 
@@ -77,6 +80,8 @@ function App() {
               <Route path="/supplier/inventory/:id" element={<SupplierInventoryDetail />} />
               <Route path="/supplier/reports" element={<SupplierReportList />} />
               <Route path="/supplier/reports/:id" element={<SupplierReportDetail />} />
+              <Route path="/supplier/profile" element={<SupplierProfile />} />
+              <Route path="/supplier/profile/edit" element={<SupplierProfileEdit />} />
             </Route>
           </Route>
 
@@ -91,6 +96,7 @@ function App() {
               <Route path="/customer/orders/:id" element={<CustomerOrderDetail />} />
               <Route path="/customer/payments" element={<CustomerPaymentList />} />
               <Route path="/customer/profile" element={<CustomerProfile />} />
+              <Route path="/customer/profile/edit" element={<CustomerProfileEdit />} />
             </Route>
           </Route>
         </Routes>
