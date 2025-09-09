@@ -9,7 +9,7 @@ const Sidebar = ({ menuItems }) => {
       <ul className="space-y-2">
         {menuItems.map((item) => (
           <li key={item.path} >
-            <Link to={item.path} className={`block p-2 hover:bg-gray-700 rounded ${location.pathname === item.path ? 'bg-white font-bold text-black' : 'hover:bg-gray-700'}`}>
+            <Link to={item.path} className={`block p-2  rounded ${location.pathname === item.path ? 'bg-white font-bold text-black' : 'hover:bg-gray-700 '}`}>
               {item.name}
             </Link>
           </li>

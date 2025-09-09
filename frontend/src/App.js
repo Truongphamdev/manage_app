@@ -20,7 +20,6 @@ import OrderDetail from './components/orders/OrderDetail';
 import InventoryList from './components/inventory/InventoryList';
 import InventoryDetail from './components/inventory/InventoryDetail';
 import ReportList from './components/reports/ReportList';
-import ReportDetail from './components/reports/ReportDetail';
 import SupplierProductList from './components/supplier/products/SupplierProductList';
 import SupplierProductDetail from './components/supplier/products/SupplierProductDetail';
 import SupplierOrderList from './components/supplier/orders/SupplierOrderList';
@@ -36,6 +35,12 @@ import CustomerPaymentList from './components/customer/payments/CustomerPaymentL
 import CustomerProfile from './components/customer/profile/CustomerProfile';
 import { UserProvider } from './api/context/UserContext';
 import PurchaseForm from './components/products/purchase/AddPurchase';
+import  InventoryReport  from './components/reports/InventoryReport';
+import { Invoice } from './components/reports/invoice/Invoice';
+import { InvoicePurchase } from './components/reports/invoice/InvoicePurchase';
+import { InvoiceOrder } from './components/reports/invoice/InvoiceOrder';
+import { InvoicePurchaseDetail } from './components/reports/invoice/InvoicePurchaseDetail';
+import { InvoiceOrderDetail } from './components/reports/invoice/InvoiceOrderDetail';
 
 function App() {
   return (
@@ -59,9 +64,14 @@ function App() {
               <Route path="/admin/orders/:id" element={<OrderDetail />} />
               <Route path="/admin/inventory" element={<InventoryList />} />
               <Route path="/admin/inventory/:id" element={<InventoryDetail />} />
+              <Route path="/admin/inventory/:id/report" element={<InventoryReport />} />
               <Route path="/admin/reports" element={<ReportList />} />
-              <Route path="/admin/reports/:id" element={<ReportDetail />} />
               <Route path="/admin/purchase" element={<PurchaseForm />} />
+              <Route path="/admin/invoices" element={<Invoice />} />
+              <Route path='/admin/invoices/purchase' element={<InvoicePurchase/>}/>
+              <Route path='/admin/invoices/purchase/:id' element={<InvoicePurchaseDetail/>}/>
+              <Route path='/admin/invoices/order/:id' element={<InvoiceOrderDetail/>}/>
+              <Route path='/admin/invoices/order' element={<InvoiceOrder/>}/>
             </Route>
           </Route>
 

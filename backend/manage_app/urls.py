@@ -1,10 +1,10 @@
 from django.urls import path
 from .views import (
-    RegisterView, LoginView, UserManagementViewSet, ManageProductViewSet,
-    ReportViewSet, ReportRevenueViewSet, ProposalProductAdminViewSet, ProposalProductViewSet,
+    RegisterView, LoginView, UserManagementViewSet, ManageProductViewSet, ProposalProductAdminViewSet, ProposalProductViewSet,
     OrderDetailViewSet, HistoryStockViewSet, CategoryViewSet, CartViewSet, SupplierCreateViewSet,
     PurchaseCreateView, PaymentPurchaseCreateView, UpdateUserView, ChangePasswordView,
-    ProductSupplierViewSet, ManagePurchaseViewSet, InventoryViewSet,SearchbyLocationViewSet,CombinedSearchViewSet
+    ProductSupplierViewSet, ManagePurchaseViewSet, InventoryViewSet,SearchbyLocationViewSet,CombinedSearchViewSet,ReportViewSet,ReportRevenueViewSet,
+    SearchbyProductNameViewSet,InvoicePurchaseViewSet,InvoiceOrderViewSet
 )
 from rest_framework_simplejwt.views import TokenRefreshView
 
@@ -38,6 +38,16 @@ urlpatterns = [
 
     # Admin proposal
     path('admin/proposal/<int:pk>/', ProposalProductAdminViewSet.as_view({'patch': 'partial_update'}), name='proposal-admin'),
+    # admin invoice
+    path('admin/invoices/purchase/', InvoicePurchaseViewSet.as_view({'get': 'list'}), name='list-invoices'),
+    path('admin/invoices/purchase/<int:pk>/', InvoicePurchaseViewSet.as_view({'get': 'retrieve'}), name='retrieve-invoice'),
+    path('admin/invoices/purchase/<int:pk>/delete/',InvoicePurchaseViewSet.as_view({'delete': 'destroy'}), name='delete-invoice'),
+    path('admin/invoices/purchase/<int:pk>/export/', InvoicePurchaseViewSet.as_view({'get': 'export'}), name='export-invoice'),
+    # invoice order
+    path('admin/invoices/order/', InvoiceOrderViewSet.as_view({'get': 'list'}), name='list-invoices'),
+    path('admin/invoices/order/<int:pk>/', InvoiceOrderViewSet.as_view({'get': 'retrieve'}), name='retrieve-invoice'),
+    path('admin/invoices/order/<int:pk>/delete/', InvoiceOrderViewSet.as_view({'delete': 'destroy'}), name='delete-invoice'),
+    path('admin/invoices/order/<int:pk>/export/', InvoiceOrderViewSet.as_view({'get': 'export'}), name='export-invoice'),
 
     # Admin category
     path('admin/categories/', CategoryViewSet.as_view({'post': 'create'}), name='add-category'),
@@ -68,4 +78,6 @@ urlpatterns = [
     # search
     path('function/search/location/', SearchbyLocationViewSet.as_view({'get': 'list'}), name='search-by-location'),
     path('function/search/combined/', CombinedSearchViewSet.as_view({'get': 'list'}), name='combined-search'),
+    path('function/search/productname/', SearchbyProductNameViewSet.as_view({'get': 'list'}), name='search-by-productname'),
+    
 ]
