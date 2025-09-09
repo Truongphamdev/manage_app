@@ -1,4 +1,4 @@
-import React, { use, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import All_Api from "../../api/AllApi";
 
@@ -6,18 +6,21 @@ const InventoryList = () => {
   const [inventories, setInventories] = useState([]);
   const [locations, setLocations] = useState(["kho HCM", "kho HN", "kho DN"]);
   const [selectedLocation, setSelectedLocation] = useState("");
+  const [search, setSearch] = useState("");
+
+  const getinventories = async () => {
+  try {
+    const response = await All_Api.getInventory();
+    setInventories(response);
+    console.log("inventories", response);
+  } catch (error) {
+    console.error("Error fetching inventory data:", error);
+  }
+};
   useEffect(() => {
-    const getinventories = async () => {
-      try {
-        const response = await All_Api.getInventory();
-        setInventories(response);
-        console.log("inventories", response);
-      } catch (error) {
-        console.error("Error fetching inventory data:", error);
-      }
-    };
     getinventories();
   }, []);
+  console.log("search", search);
 
     const handleFilter = async () => {
       try {
@@ -33,13 +36,44 @@ const InventoryList = () => {
         console.error("Error filtering inventory data:", error);
       }
     };
-
-return (
-  <div className="bg-white p-6 rounded-2xl shadow-lg">
-    {/* Header */}
-    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+  useEffect(() => {
+    const fetchData = async () => {
+      const params = {};
+      if (search) {
+        params.search = search;
+      }
+      try {
+        const response = await All_Api.searchByProductName(params);
+        setInventories(response);
+        console.log("Search results:", response);
+      } catch (error) {
+        console.error("Error searching inventory data:", error);
+      }
+    };
+    if (search === "") {
+      getinventories();
+      return;
+    }
+      const timeoutId = setTimeout(() => {
+        fetchData();
+      }, 400);
+      return () => clearTimeout(timeoutId);
+  }, [search]);
+  return (
+    <div className="bg-white p-6 rounded-2xl shadow-lg">
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
       <h2 className="text-2xl font-bold text-gray-800">📦 Danh sách tồn kho</h2>
       <div className="flex items-center gap-3">
+        <div className="flex-1">
+    <input
+      type="text"
+      placeholder="Tìm kiếm sản phẩm..."
+      value={search}
+      onChange={(e) => setSearch(e.target.value)}
+      className="w-full px-4 py-2 border border-gray-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+    />
+  </div>
         <label className="text-gray-700 font-medium">Lọc theo kho:</label>
         <select
           value={selectedLocation}
@@ -56,6 +90,11 @@ return (
         <button onClick={()=>{handleFilter()}} className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600">Lọc</button>
       </div>
     </div>
+    {inventories.length === 0 ? (
+      <p className="text-gray-600">Không có dữ liệu tồn kho.</p>
+    ) : (
+      <div></div>
+    )}
 
     {/* Table view cho md+ */}
     <div className="hidden md:block overflow-x-auto">
@@ -88,9 +127,15 @@ return (
               <td className="py-3 px-4 border-b text-center">
                 <Link
                   to={`/admin/inventory/${item.id}`}
-                  className="bg-blue-500 text-white px-3 py-1.5 rounded-lg shadow hover:bg-blue-600 transition-colors"
+                  className="bg-blue-500 mr-4 text-white px-3 py-1.5 rounded-lg shadow hover:bg-blue-600 transition-colors"
                 >
                   Xem chi tiết
+                </Link>
+                <Link
+                  to={`/admin/inventory/${item.ProductID}/report`}
+                  className="bg-green-500 text-white px-3 py-1.5 rounded-lg shadow hover:bg-green-600 transition-colors"
+                >
+                Xem báo cáo
                 </Link>
               </td>
             </tr>

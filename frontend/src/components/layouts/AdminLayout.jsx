@@ -12,7 +12,8 @@ const AdminLayout = () => {
     { name: 'Quản lý sản phẩm', path: '/admin/products' },
     { name: 'Quản lý đơn hàng', path: '/admin/orders' },
     { name: 'Quản lý tồn kho', path: '/admin/inventory' },
-    { name: 'Báo cáo', path: '/admin/reports' },
+    { name: 'Báo cáo Doanh Thu', path: '/admin/reports' },
+    { name: 'In hóa đơn', path: '/admin/invoices' },
   ];
 
   return (

@@ -20,10 +20,25 @@ const All_Api = {
     updateProduct: (id, data) => axiosClient.put(`/admin/products/${id}/`, data),
     deleteProduct: (id) => axiosClient.delete(`/admin/products/${id}/`),
     getFormdata: () => axiosClient.get('/admin/products/form-data/'),
+    // get invoices
+    getInvoicesPurchase: () => axiosClient.get('/admin/invoices/purchase'),
+    getInvoicePurchaseById: (id) => axiosClient.get(`/admin/invoices/purchase/${id}/`),
+    deleteInvoicePurchase: (id) => axiosClient.delete(`/admin/invoices/purchase/${id}/delete/`),
+    exportInvoicePurchase: (id) => axiosClient.get(`/admin/invoices/purchase/${id}/export/`, {responseType: 'blob'}),
+    // order
+    getInvoicesOrder: () => axiosClient.get('/admin/invoices/order'),
+    getInvoiceOrderById: (id) => axiosClient.get(`/admin/invoices/order/${id}/`),
+    deleteInvoiceOrder: (id) => axiosClient.delete(`/admin/invoices/order/${id}/delete/`),
+    exportInvoiceOrder: (id) => axiosClient.get(`/admin/invoices/order/${id}/export/`, {responseType: 'blob'}),
 // inventory
     getInventory: () => axiosClient.get('/admin/inventory/'),
     getInventoryById: (id) => axiosClient.get(`/admin/inventory/${id}/`),
-    
+    // report
+    getReportInventory: (params) => axiosClient.get('/admin/report/', { params }),
+    exportReportInventory: (params) => axiosClient.get('/admin/report/export/', { params,responseType: 'blob' }),
+    getReportRevenue: (params) => axiosClient.get('/admin/report/revenue/', { params }),
+    exportReportRevenue: (params) => axiosClient.get('/admin/report/revenue/export/', { params,responseType: 'blob' }),
+    // order
     // admin purchase
     createPurchase: (data) => axiosClient.post('/admin/purchase/', data),
     getPurchaseById: (id) => axiosClient.get(`/admin/purchase/${id}/`),
@@ -41,6 +56,8 @@ const All_Api = {
     getPurchaseDetailById: (id) => axiosClient.get(`/supplier/purchases/${id}/`),
     // search
     searchByLocation: (params) => axiosClient.get('/function/search/location/', { params }),
+    // search by product name
+    searchByProductName: (params) => axiosClient.get('/function/search/productname/', { params }),
     // kết hợp nhiều tiêu chí tìm kiếm
     combinedSearch: (params) => axiosClient.get('/function/search/combined/', { params }),
 }

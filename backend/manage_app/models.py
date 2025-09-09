@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 import uuid
+from django.utils import timezone
 # bảng user
 class User(AbstractUser):
     ROLE_CHOICES = (
@@ -150,7 +151,8 @@ class StockImport(models.Model):
     cost_price = models.DecimalField(max_digits=12, decimal_places=2)
     import_date = models.DateTimeField(auto_now_add=True)
     supplier = models.ForeignKey(Supplier, on_delete=models.CASCADE)
-
+    created_at = models.DateTimeField(default=timezone.now)
+    updated_at = models.DateTimeField(auto_now=True)
     def __str__(self):
         return f"StockImport {self.id} - {self.product.name} - {self.quantity} - {self.cost_price}"
 
@@ -161,7 +163,8 @@ class StockExport(models.Model):
     price = models.DecimalField(max_digits=12, decimal_places=2)
     export_date = models.DateTimeField(auto_now_add=True)
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
-
+    created_at = models.DateTimeField(default=timezone.now)
+    updated_at = models.DateTimeField(auto_now=True)
     def __str__(self):
         return f"StockExport {self.id} - {self.product.name} - {self.quantity} - {self.export_date}"
 

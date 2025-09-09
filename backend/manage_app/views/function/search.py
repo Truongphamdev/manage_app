@@ -14,7 +14,14 @@ class SearchbyLocationViewSet(viewsets.ViewSet):
         serializer = InventorySerializer(inventory, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-
+class SearchbyProductNameViewSet(viewsets.ViewSet):
+    def list(self, request):
+        search = request.query_params.get('search', '')
+        inventory = Inventory.objects.all()
+        if search:
+            inventory = inventory.filter(product__name__icontains=search)
+        serializer = InventorySerializer(inventory, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 class CombinedSearchViewSet(viewsets.ViewSet):
     def list(self, request):
