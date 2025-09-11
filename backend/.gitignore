@@ -4,8 +4,10 @@ env/
 __pycache__/
 venv/
 ENV/
+.env
+env
 backend/env/
-
+backend/.env
 
 # Node
 node_modules/
