@@ -5,6 +5,7 @@ const Sidebar = ({ menuItems, isOpen, toggleSidebar }) => {
   const location = useLocation();
 
   return (
+
     <div>
       {/* Sidebar for desktop */}
       <div className="hidden md:block w-64 bg-gray-800 text-white min-h-screen p-4">
@@ -55,6 +56,7 @@ const Sidebar = ({ menuItems, isOpen, toggleSidebar }) => {
           onClick={toggleSidebar}
         ></div>
       )}
+
     </div>
   );
 };

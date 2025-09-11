@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 import uuid
+from django.utils import timezone
 # bảng user
 class User(AbstractUser):
     ROLE_CHOICES = (
@@ -90,6 +91,7 @@ class Purchase(models.Model):
     purchase_date = models.DateTimeField(auto_now_add=True)
     total_amount = models.DecimalField(max_digits=12, decimal_places=2)
 
+
     def __str__(self):
         return f"Purchase {self.purchaseID} - {self.supplier.full_name}"
 class PurchaseDetail(models.Model):
@@ -149,7 +151,8 @@ class StockImport(models.Model):
     cost_price = models.DecimalField(max_digits=12, decimal_places=2)
     import_date = models.DateTimeField(auto_now_add=True)
     supplier = models.ForeignKey(Supplier, on_delete=models.CASCADE)
-
+    created_at = models.DateTimeField(default=timezone.now)
+    updated_at = models.DateTimeField(auto_now=True)
     def __str__(self):
         return f"StockImport {self.id} - {self.product.name} - {self.quantity} - {self.cost_price}"
 
@@ -160,7 +163,8 @@ class StockExport(models.Model):
     price = models.DecimalField(max_digits=12, decimal_places=2)
     export_date = models.DateTimeField(auto_now_add=True)
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
-
+    created_at = models.DateTimeField(default=timezone.now)
+    updated_at = models.DateTimeField(auto_now=True)
     def __str__(self):
         return f"StockExport {self.id} - {self.product.name} - {self.quantity} - {self.export_date}"
 
@@ -187,6 +191,10 @@ class InvoiceOrder(models.Model):
     def __str__(self):
         return f"Invoice {self.id} - {self.order.customer.full_name} - {self.total_amount}"
 
+    def save(self, *args, **kwargs):
+        if not self.invoice_number:
+            self.invoice_number = f"INV-{uuid.uuid4().hex[:10].upper()}"
+        super().save(*args, **kwargs)
 class InvoicePurchase(models.Model):
     id = models.AutoField(primary_key=True)
     purchase = models.ForeignKey(Purchase, on_delete=models.CASCADE)
@@ -230,6 +238,11 @@ class PaymentOrder(models.Model):
         ("failed", "Failed"),
     ), default="pending")
 
+    def save(self, *args, **kwargs):
+        if not self.transaction_id:
+            self.transaction_id = f"TRANS-{uuid.uuid4().hex[:10].upper()}"
+        super().save(*args, **kwargs)
+
 # paymentpurchase
 class PaymentPurchase(models.Model):
     id = models.AutoField(primary_key=True)
@@ -246,6 +259,10 @@ class PaymentPurchase(models.Model):
         ("completed", "Completed"),
         ("failed", "Failed"),
     ), default="pending")
+    def save(self, *args, **kwargs):
+        if not self.transaction_id:
+            self.transaction_id = f"TRANS-{uuid.uuid4().hex[:10].upper()}"
+        super().save(*args, **kwargs)
 
 # bảng cart
 class Cart(models.Model):

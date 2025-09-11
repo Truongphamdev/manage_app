@@ -1,9 +1,10 @@
 from django.urls import path
 from .views import (
-    RegisterView, LoginView, UserManagementViewSet, ManageProductViewSet,
-    ReportViewSet, ReportRevenueViewSet, ProposalProductAdminViewSet, ProposalProductViewSet,
+    RegisterView, LoginView, UserManagementViewSet, ManageProductViewSet, ProposalProductAdminViewSet, ProposalProductViewSet,
     OrderDetailViewSet, HistoryStockViewSet, CategoryViewSet, CartViewSet, SupplierCreateViewSet,
-    PurchaseCreateView, PaymentPurchaseCreateView, UpdateUserView, ChangePasswordView
+    PurchaseCreateView, PaymentPurchaseCreateView, UpdateUserView, ChangePasswordView,
+    ProductSupplierViewSet, ManagePurchaseViewSet, InventoryViewSet,SearchbyLocationViewSet,CombinedSearchViewSet,ReportViewSet,ReportRevenueViewSet,
+    SearchbyProductNameViewSet,InvoicePurchaseViewSet,InvoiceOrderViewSet
 )
 from rest_framework_simplejwt.views import TokenRefreshView
 
@@ -27,7 +28,8 @@ urlpatterns = [
     path('admin/products/', ManageProductViewSet.as_view({'get':'list', 'post':'create'})),
     path('admin/products/<int:pk>/', ManageProductViewSet.as_view({'get':'retrieve', 'put':'update', 'delete':'destroy'})),
     path('admin/products/form-data/', ManageProductViewSet.as_view({'get':'form_data'})),
-
+    path('admin/inventory/', InventoryViewSet.as_view({'get':'list'}), name='inventory-list'),
+    path('admin/inventory/<int:pk>/', InventoryViewSet.as_view({'get':'retrieve'}), name='inventory-detail'),
     # Admin report
     path('admin/report/', ReportViewSet.as_view({'get':'list'}), name='stock-report'),
     path('admin/report/export/', ReportViewSet.as_view({'get':'export_report'}), name='stock-report-export'),
@@ -36,6 +38,16 @@ urlpatterns = [
 
     # Admin proposal
     path('admin/proposal/<int:pk>/', ProposalProductAdminViewSet.as_view({'patch': 'partial_update'}), name='proposal-admin'),
+    # admin invoice
+    path('admin/invoices/purchase/', InvoicePurchaseViewSet.as_view({'get': 'list'}), name='list-invoices'),
+    path('admin/invoices/purchase/<int:pk>/', InvoicePurchaseViewSet.as_view({'get': 'retrieve'}), name='retrieve-invoice'),
+    path('admin/invoices/purchase/<int:pk>/delete/',InvoicePurchaseViewSet.as_view({'delete': 'destroy'}), name='delete-invoice'),
+    path('admin/invoices/purchase/<int:pk>/export/', InvoicePurchaseViewSet.as_view({'get': 'export'}), name='export-invoice'),
+    # invoice order
+    path('admin/invoices/order/', InvoiceOrderViewSet.as_view({'get': 'list'}), name='list-invoices'),
+    path('admin/invoices/order/<int:pk>/', InvoiceOrderViewSet.as_view({'get': 'retrieve'}), name='retrieve-invoice'),
+    path('admin/invoices/order/<int:pk>/delete/', InvoiceOrderViewSet.as_view({'delete': 'destroy'}), name='delete-invoice'),
+    path('admin/invoices/order/<int:pk>/export/', InvoiceOrderViewSet.as_view({'get': 'export'}), name='export-invoice'),
 
     # Admin category
     path('admin/categories/', CategoryViewSet.as_view({'post': 'create'}), name='add-category'),
@@ -46,7 +58,11 @@ urlpatterns = [
     path('admin/purchase/payment/qrcode/<int:pk>/', PaymentPurchaseCreateView.as_view({'get': 'get'}), name='payment-qrcode'),
     # Supplier proposal
     path('supplier/proposal/', ProposalProductViewSet.as_view({'post': 'create'}), name='create-proposal'),
-
+    # manage supplier
+    path('supplier/products/', ProductSupplierViewSet.as_view({'get': 'list'}), name='list-products'),
+    path('supplier/products/<int:pk>/', ProductSupplierViewSet.as_view({'get': 'retrieve'}), name='retrieve-product'),
+    path('supplier/purchases/', ManagePurchaseViewSet.as_view({'get': 'list'}), name='list-purchases'),
+    path('supplier/purchases/<int:pk>/', ManagePurchaseViewSet.as_view({'get': 'retrive'}), name='retrieve-purchase'),
     # Supplier order/history
     path('supplier/orders/', OrderDetailViewSet.as_view({'get': 'list'}), name='list-orders'),
     path('supplier/orders/<int:pk>/', OrderDetailViewSet.as_view({'get': 'retrieve'}), name='retrieve-order'),
@@ -59,4 +75,9 @@ urlpatterns = [
     # profile
     path('auth/user/update/', UpdateUserView.as_view(), name='update-user'),
     path('auth/user/change-password/', ChangePasswordView.as_view(), name='change-password'),
+    # search
+    path('function/search/location/', SearchbyLocationViewSet.as_view({'get': 'list'}), name='search-by-location'),
+    path('function/search/combined/', CombinedSearchViewSet.as_view({'get': 'list'}), name='combined-search'),
+    path('function/search/productname/', SearchbyProductNameViewSet.as_view({'get': 'list'}), name='search-by-productname'),
+    
 ]

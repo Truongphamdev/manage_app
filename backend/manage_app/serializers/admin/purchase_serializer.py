@@ -150,6 +150,12 @@ class CreatePurchaseSerializer(serializers.Serializer):
                 status='paid',
                 total_amount=total_amount,
             )
+            PaymentPurchase.objects.create(
+                purchase=purchase,
+                payment_method='cash',
+                amount=total_amount,
+                status='completed',
+            )
         return purchase
 class PaymentPurchaseCreateSerializer(serializers.ModelSerializer):
     class Meta:

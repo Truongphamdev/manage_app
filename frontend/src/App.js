@@ -18,14 +18,12 @@ import ProductDetail from './components/products/ProductDetail';
 import OrderList from './components/orders/OrderList';
 import OrderDetail from './components/orders/OrderDetail';
 import InventoryList from './components/inventory/InventoryList';
+import InventoryDetail from './components/inventory/InventoryDetail';
 import ReportList from './components/reports/ReportList';
-import ReportDetail from './components/reports/ReportDetail';
 import SupplierProductList from './components/supplier/products/SupplierProductList';
 import SupplierProductDetail from './components/supplier/products/SupplierProductDetail';
 import SupplierOrderList from './components/supplier/orders/SupplierOrderList';
 import SupplierOrderDetail from './components/supplier/orders/SupplierOrderDetail';
-import SupplierInventoryList from './components/supplier/inventory/SupplierInventoryList';
-import SupplierInventoryDetail from './components/supplier/inventory/SupplierInventoryDetail';
 import SupplierReportList from './components/supplier/reports/SupplierReportList';
 import SupplierReportDetail from './components/supplier/reports/SupplierReportDetail';
 import CustomerProductList from './components/customer/products/CustomerProductList';
@@ -40,6 +38,12 @@ import SupplierProfile from './components/supplier/profile/SupplierProfile';
 import SupplierProfileEdit from './components/supplier/profile/SupplierProfileEdit';
 import { UserProvider } from './api/context/UserContext';
 import PurchaseForm from './components/products/purchase/AddPurchase';
+import  InventoryReport  from './components/reports/InventoryReport';
+import { Invoice } from './components/reports/invoice/Invoice';
+import { InvoicePurchase } from './components/reports/invoice/InvoicePurchase';
+import { InvoiceOrder } from './components/reports/invoice/InvoiceOrder';
+import { InvoicePurchaseDetail } from './components/reports/invoice/InvoicePurchaseDetail';
+import { InvoiceOrderDetail } from './components/reports/invoice/InvoiceOrderDetail';
 
 function App() {
   return (
@@ -62,9 +66,15 @@ function App() {
               <Route path="/admin/orders" element={<OrderList />} />
               <Route path="/admin/orders/:id" element={<OrderDetail />} />
               <Route path="/admin/inventory" element={<InventoryList />} />
+              <Route path="/admin/inventory/:id" element={<InventoryDetail />} />
+              <Route path="/admin/inventory/:id/report" element={<InventoryReport />} />
               <Route path="/admin/reports" element={<ReportList />} />
-              <Route path="/admin/reports/:id" element={<ReportDetail />} />
               <Route path="/admin/purchase" element={<PurchaseForm />} />
+              <Route path="/admin/invoices" element={<Invoice />} />
+              <Route path='/admin/invoices/purchase' element={<InvoicePurchase/>}/>
+              <Route path='/admin/invoices/purchase/:id' element={<InvoicePurchaseDetail/>}/>
+              <Route path='/admin/invoices/order/:id' element={<InvoiceOrderDetail/>}/>
+              <Route path='/admin/invoices/order' element={<InvoiceOrder/>}/>
             </Route>
           </Route>
 
@@ -75,9 +85,7 @@ function App() {
               <Route path="/supplier/products" element={<SupplierProductList />} />
               <Route path="/supplier/products/:id" element={<SupplierProductDetail />} />
               <Route path="/supplier/orders" element={<SupplierOrderList />} />
-              <Route path="/supplier/orders/:id" element={<SupplierOrderDetail />} />
-              <Route path="/supplier/inventory" element={<SupplierInventoryList />} />
-              <Route path="/supplier/inventory/:id" element={<SupplierInventoryDetail />} />
+              <Route path="/supplier/purchases/:id" element={<SupplierOrderDetail />} />
               <Route path="/supplier/reports" element={<SupplierReportList />} />
               <Route path="/supplier/reports/:id" element={<SupplierReportDetail />} />
               <Route path="/supplier/profile" element={<SupplierProfile />} />
