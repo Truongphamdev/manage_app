@@ -1,1 +1,19 @@
+# Python
+env/
+*.pyc
+__pycache__/
+venv/
+ENV/
 .env
+env
+backend/env/
+backend/.env
+
+# Node
+node_modules/
+dist/
+build/
+
+# IDE
+.vscode/
+.idea/
