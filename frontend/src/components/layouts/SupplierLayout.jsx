@@ -3,15 +3,15 @@ import { Outlet } from 'react-router-dom';
 import Navbar from '../common/Navbar';
 import Sidebar from '../common/Sidebar';
 import Footer from '../common/Footer';
-import Header from '../common/Header';
 
 const SupplierLayout = () => {
   const menuItems = [
-    { name: 'Dashboard', path: '/supplier' },
+    { name: 'Dashboard', path: '/dashboard/supplier' },
     { name: 'Quản lý sản phẩm', path: '/supplier/products' },
-    { name: 'Đơn hàng', path: '/supplier/orders' },
+    { name: 'Đơn hàng', path: '/supplier/purchases' },
     { name: 'Tồn kho', path: '/supplier/inventory' },
     { name: 'Báo cáo doanh số', path: '/supplier/reports' },
+    { name: 'Thông tin cá nhân', path: '/supplier/profile' },
   ];
 
   return (

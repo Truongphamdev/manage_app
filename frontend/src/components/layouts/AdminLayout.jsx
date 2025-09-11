@@ -7,7 +7,7 @@ import Header from '../common/Header';
 
 const AdminLayout = () => {
   const menuItems = [
-    { name: 'Dashboard', path: '/admin' },
+    { name: 'Dashboard', path: '/dashboard/admin' },
     { name: 'Quản lý người dùng', path: '/admin/users' },
     { name: 'Quản lý sản phẩm', path: '/admin/products' },
     { name: 'Quản lý đơn hàng', path: '/admin/orders' },

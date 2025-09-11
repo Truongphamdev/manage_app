@@ -178,7 +178,7 @@ return (
     </div>
 
     <Link
-      to="/supplier/orders"
+      to="/supplier/purchases"
       className="mt-6 inline-block bg-gray-600 text-white px-6 py-2 rounded-xl shadow hover:bg-gray-700 transition-colors"
     >
       Quay lại

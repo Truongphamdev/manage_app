@@ -1,9 +1,11 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useUser } from '../../api/context/UserContext';
 
 const Header = ({ role }) => {
   const navigate = useNavigate();
-  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  const { user } = useUser();
+  console.log("header user", user);
 
   return (
     <header className="bg-white shadow-md p-4 flex justify-between items-center">
@@ -12,7 +14,7 @@ const Header = ({ role }) => {
       </div>
       <div className="flex items-center space-x-4">
         <span className="text-gray-600">
-          {user.fullName || 'Người dùng'} ({role})
+          {user?.fullName || 'Người dùng'} ({role})
         </span>
         <button
           onClick={() => {

@@ -19,6 +19,7 @@ from .supplier.mana_product import ProductSupplierViewSet
 from .supplier.manage_purchase import ManagePurchaseViewSet
 # customer
 from .customer.cart import CartViewSet
-from .auth.auth_view import UpdateUserView,ChangePasswordView
+from .auth.auth_view import UpdateCustomerView,UpdateSupplierView,ChangePasswordView
+from .customer.product.product import CustomerProductViewSet
 # function
 from .function.search import SearchbyLocationViewSet,CombinedSearchViewSet,SearchbyProductNameViewSet

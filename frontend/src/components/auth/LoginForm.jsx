@@ -24,11 +24,11 @@ const LoginForm = () => {
     }
     setUser(response.user);
     if(response.user.role === 'admin' && response.user.is_block === false){
-      navigate('/admin');
+      navigate('/dashboard/admin');
     } else if(response.user.role === 'supplier' && response.user.is_block === false){
-      navigate('/supplier');
+      navigate('/dashboard/supplier');
     } else if(response.user.role === 'customer' && response.user.is_block === false){
-      navigate('/customer');
+      navigate('/dashboard/customer');
     } else if (response.user.is_block === true) {
       window.alert("Tài khoản của bạn đã bị khóa. Vui lòng liên hệ quản trị viên.");
       navigate('/');

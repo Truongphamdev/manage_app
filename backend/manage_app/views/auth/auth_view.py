@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from rest_framework import viewsets
 from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
@@ -6,17 +7,35 @@ from rest_framework import status
 from rest_framework_simplejwt.tokens import RefreshToken
 from ...serializers import (
     UserRegistrationSerializer, UserLoginSerializer, SupplierSerializer,
-    CustomerSerializer, UserUpdateSerializer, ChangePasswordSerializer
+    CustomerSerializer, ChangePasswordSerializer
 )
+from ...permissions import IsCustomerRole,IsSupplierRole
 from ...models import User, Supplier, Customer
 
 class RegisterView(APIView):
     permission_classes = [AllowAny]
     def post(self, request, *args, **kwargs):
+        print("Request data:", request.data)
         serializer = UserRegistrationSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save()
-            return Response({'message': "Đăng ký thành công"}, status=status.HTTP_201_CREATED)
+            serializer.save()  # Gọi save trước để tạo user và customer
+            user = serializer.instance  # Lấy user từ serializer.instance
+            refresh = RefreshToken.for_user(user)
+            user_data = {}
+            if user.role == "customer":
+                customer = Customer.objects.filter(user=user).first()
+                if not customer:
+                    return Response({'detail': 'Customer profile not found'}, status=status.HTTP_404_NOT_FOUND)
+                user_data = CustomerSerializer(customer).data
+            user_data['role'] = user.role
+            user_data['is_block'] = user.is_block
+            user_data['full_name'] = user.username  # Hoặc customer.full_name nếu có
+            return Response({
+                'access': str(refresh.access_token),
+                'refresh': str(refresh),
+                'user': user_data,
+            }, status=status.HTTP_200_OK)
+            
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class LoginView(APIView):
@@ -50,10 +69,29 @@ class LoginView(APIView):
             }, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-class UpdateUserView(APIView):
-    permission_classes = [IsAuthenticated]
-    def put(self, request, *args, **kwargs):
-        serializer = UserUpdateSerializer(request.user, data=request.data, partial=True)
+class UpdateCustomerView(viewsets.ViewSet):
+    permission_classes = [IsCustomerRole]
+    def retrieve(self, request, *args, **kwargs):
+        customer = Customer.objects.get(user=request.user)
+        serializer = CustomerSerializer(customer)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    def update(self, request, *args, **kwargs):
+        print("Request data:", request.data)
+        customer = Customer.objects.get(user=request.user)
+        serializer = CustomerSerializer(customer, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({'message': "Cập nhật thành công"}, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+class UpdateSupplierView(viewsets.ViewSet):
+    permission_classes = [IsSupplierRole]
+    def retrieve(self, request, *args, **kwargs):
+        supplier = Supplier.objects.get(user=request.user)
+        serializer = SupplierSerializer(supplier)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    def update(self, request, *args, **kwargs):
+        supplier = Supplier.objects.get(user=request.user)
+        serializer = SupplierSerializer(supplier, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response({'message': "Cập nhật thành công"}, status=status.HTTP_200_OK)

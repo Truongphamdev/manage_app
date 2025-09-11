@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import All_Api from '../../api/AllApi';
+import { useUser } from '../../api/context/UserContext';
 const RegisterForm = () => {
   const [formData, setFormData] = useState({
     username: '',
@@ -15,6 +16,7 @@ const RegisterForm = () => {
   const [errors, setErrors] = useState('');
   const [error,setError] = useState('')
   const navigate = useNavigate();
+  const {setUser} = useUser();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -25,7 +27,11 @@ const RegisterForm = () => {
     try {
       const response = await All_Api.register(formData);
       console.log(response)
-      navigate('/login');
+      localStorage.setItem('access', response.access);
+      localStorage.setItem('refresh', response.refresh);
+      localStorage.setItem('user', JSON.stringify(response.user));
+      setUser(response.user);
+      navigate('/dashboard/customer');
     } catch (error) {
       setErrors(error.response.data);
     }

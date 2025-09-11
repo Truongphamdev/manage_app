@@ -46,7 +46,11 @@ const All_Api = {
     generateQRCode: (id) => axiosClient.get(`/admin/purchase/payment/qrcode/${id}/`),
     createPayment: (data) => axiosClient.post('/admin/purchase/payment/', data),
     // profile
-    updateUserProfile: (data) => axiosClient.put('/auth/user/update/', data),
+    getUserProfile: () => axiosClient.get('/auth/user/customer/'),
+    updateUserProfile: (data) => axiosClient.put('/auth/user/update/customer/', data),
+    getSupplierProfile: () => axiosClient.get('/auth/user/supplier/'),
+    updateSupplierProfile: (data) => axiosClient.put('/auth/user/update/supplier/', data),
+    // đổi mật khẩu
     changePassword: (data) => axiosClient.post('/auth/user/change-password/', data),
     // supplier
     getSupplierProducts: () => axiosClient.get('/supplier/products/'),
@@ -54,6 +58,15 @@ const All_Api = {
     // manage purchase
     getPurchases: () => axiosClient.get('/supplier/purchases/'),
     getPurchaseDetailById: (id) => axiosClient.get(`/supplier/purchases/${id}/`),
+    // customer
+    // customer product
+    getCustomerProducts: () => axiosClient.get('/customer/products/'),
+    getCustomerProductById: (id) => axiosClient.get(`/customer/products/${id}/`),
+    // cart
+    getCart: () => axiosClient.get('/customer/cart/'),
+    addToCart: (data) => axiosClient.post('/customer/cart/add/', data),
+    removeCartItem: (id) => axiosClient.delete(`/customer/cart/remove/${id}/`),
+    updateCartItemQuantity: (id, data) => axiosClient.put(`/customer/cart/update/${id}/`, data),
     // search
     searchByLocation: (params) => axiosClient.get('/function/search/location/', { params }),
     // search by product name

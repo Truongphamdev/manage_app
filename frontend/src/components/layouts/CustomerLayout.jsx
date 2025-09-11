@@ -7,7 +7,7 @@ import Header from '../common/Header';
 
 const CustomerLayout = () => {
   const menuItems = [
-    { name: 'Sản phẩm', path: '/customer' },
+    { name: 'Sản phẩm', path: '/dashboard/customer' },
     { name: 'Giỏ hàng', path: '/customer/cart' },
     { name: 'Đơn hàng', path: '/customer/orders' },
     { name: 'Thanh toán', path: '/customer/payments' },

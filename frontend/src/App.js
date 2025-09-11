@@ -24,8 +24,6 @@ import SupplierProductList from './components/supplier/products/SupplierProductL
 import SupplierProductDetail from './components/supplier/products/SupplierProductDetail';
 import SupplierOrderList from './components/supplier/orders/SupplierOrderList';
 import SupplierOrderDetail from './components/supplier/orders/SupplierOrderDetail';
-import SupplierReportList from './components/supplier/reports/SupplierReportList';
-import SupplierReportDetail from './components/supplier/reports/SupplierReportDetail';
 import CustomerProductList from './components/customer/products/CustomerProductList';
 import CustomerProductDetail from './components/customer/products/CustomerProductDetail';
 import CustomerCart from './components/customer/cart/CustomerCart';
@@ -41,6 +39,7 @@ import { InvoicePurchase } from './components/reports/invoice/InvoicePurchase';
 import { InvoiceOrder } from './components/reports/invoice/InvoiceOrder';
 import { InvoicePurchaseDetail } from './components/reports/invoice/InvoicePurchaseDetail';
 import { InvoiceOrderDetail } from './components/reports/invoice/InvoiceOrderDetail';
+import SupplierProfile from './components/supplier/profile/SupplierProfile';
 
 function App() {
   return (
@@ -55,7 +54,7 @@ function App() {
           {/* Admin protected routes */}
           <Route element={<ProtectRouter allowedRoles={['admin']} />}>
             <Route element={<AdminLayout />}>
-              <Route path="/admin" element={<AdminPage />} />
+              <Route path="/dashboard/admin" element={<AdminPage />} />
               <Route path="/admin/users" element={<UserList />} />
               <Route path="/admin/users/:id" element={<UserDetail />} />
               <Route path="/admin/products" element={<ProductList />} />
@@ -78,20 +77,19 @@ function App() {
           {/* Supplier protected routes */}
           <Route element={<ProtectRouter allowedRoles={['supplier']} />}>
             <Route element={<SupplierLayout />}>
-              <Route path="/supplier" element={<SupplierPage />} />
+              <Route path="/dashboard/supplier" element={<SupplierPage />} />
               <Route path="/supplier/products" element={<SupplierProductList />} />
               <Route path="/supplier/products/:id" element={<SupplierProductDetail />} />
-              <Route path="/supplier/orders" element={<SupplierOrderList />} />
+              <Route path="/supplier/purchases" element={<SupplierOrderList />} />
               <Route path="/supplier/purchases/:id" element={<SupplierOrderDetail />} />
-              <Route path="/supplier/reports" element={<SupplierReportList />} />
-              <Route path="/supplier/reports/:id" element={<SupplierReportDetail />} />
+              <Route path="/supplier/profile" element={<SupplierProfile />} />
             </Route>
           </Route>
 
           {/* Customer protected routes */}
           <Route element={<ProtectRouter allowedRoles={['customer']} />}>
             <Route element={<CustomerLayout />}>
-              <Route path="/customer" element={<CustomerPage />} />
+              <Route path="/dashboard/customer" element={<CustomerPage />} />
               <Route path="/customer/products" element={<CustomerProductList />} />
               <Route path="/customer/products/:id" element={<CustomerProductDetail />} />
               <Route path="/customer/cart" element={<CustomerCart />} />

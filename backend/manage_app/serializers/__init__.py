@@ -1,5 +1,5 @@
 from .auth_serializer import UserRegistrationSerializer, UserLoginSerializer, SupplierSerializer,\
-CustomerSerializer,UserUpdateSerializer,ChangePasswordSerializer,UserSerializer,SupplierCreateSerializer
+CustomerSerializer,ChangePasswordSerializer,UserSerializer,SupplierCreateSerializer
 
 # admin
 from .admin.manage_serializer import CustomerSupplierUserSerializer,ProductSerializer,CreateProductSerializer,CategorySerializer,UpdateProductSerializer
@@ -15,3 +15,4 @@ from .supplier.manage_product_serializer import ProductSupplierSerializer
 from .supplier.manage_purchase_serializer import PurchaseSerializer,PurchaseDetailSerializer
 # customer
 from .customer.cart_serializer import CartItemSerializer,CartSerializer
+from .customer.product.product_serializer import ProductCustomerSerializer

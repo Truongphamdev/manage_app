@@ -1,51 +1,126 @@
-import React from 'react';
-import { useParams, Link } from 'react-router-dom';
+import React, { useEffect, useState } from "react";
+import { useParams, Link } from "react-router-dom";
+import All_Api from "../../../api/AllApi";
 
 const CustomerProductDetail = () => {
   const { id } = useParams();
-
-  const mockProducts = [
-    { id: 1, name: 'Xi măng PC40', category: 'Xi măng', price: 80000, stock: 500, supplier: 'Công ty Xi măng Hà Tiên', description: 'Xi măng chất lượng cao dùng cho xây dựng công trình dân dụng.', specs: 'Độ bền cao, phù hợp cho bê tông.' },
-    { id: 2, name: 'Gạch đỏ 4 lỗ', category: 'Gạch', price: 1200, stock: 10000, supplier: 'Nhà máy Gạch Tuynel', description: 'Gạch đỏ chất lượng, dùng cho xây tường.', specs: 'Kích thước chuẩn, chịu lực tốt.' },
-    { id: 3, name: 'Thép phi 16', category: 'Sắt thép', price: 15000, stock: 2000, supplier: 'Tập đoàn Hòa Phát', description: 'Thép xây dựng chất lượng cao.', specs: 'Đường kính 16mm, độ bền cao.' },
-    { id: 4, name: 'Xi măng PC50', category: 'Xi măng', price: 85000, stock: 300, supplier: 'Công ty Xi măng Hà Tiên', description: 'Xi măng chất lượng cao, chịu lực tốt.', specs: 'Độ bền cao, phù hợp cho công trình lớn.' },
-    { id: 5, name: 'Gạch đỏ 6 lỗ', category: 'Gạch', price: 1500, stock: 8000, supplier: 'Nhà máy Gạch Tuynel', description: 'Gạch đỏ 6 lỗ, bền vững.', specs: 'Kích thước lớn, cách âm tốt.' },
-    { id: 6, name: 'Thép phi 12', category: 'Sắt thép', price: 12000, stock: 2500, supplier: 'Tập đoàn Hòa Phát', description: 'Thép phi 12 cho công trình nhỏ.', specs: 'Đường kính 12mm, dễ gia công.' },
-    { id: 7, name: 'Cát xây dựng', category: 'Vật liệu thô', price: 200000, stock: 100, supplier: 'Công ty Vật liệu XYZ', description: 'Cát sạch, dùng cho trộn bê tông.', specs: 'Hạt mịn, không lẫn tạp chất.' },
-    { id: 8, name: 'Đá 1x2', category: 'Vật liệu thô', price: 300000, stock: 150, supplier: 'Công ty Vật liệu XYZ', description: 'Đá xây dựng kích thước 1x2.', specs: 'Kích thước 10-20mm, phù hợp cho bê tông.' },
-    { id: 9, name: 'Sơn nước Dulux', category: 'Sơn', price: 500000, stock: 50, supplier: 'Công ty Sơn ABC', description: 'Sơn nước cao cấp, chống thấm.', specs: 'Màu sắc bền, dễ lau chùi.' },
-    { id: 10, name: 'Gạch lát nền 60x60', category: 'Gạch', price: 20000, stock: 2000, supplier: 'Nhà máy Gạch Tuynel', description: 'Gạch lát nền chất lượng cao.', specs: 'Kích thước 60x60cm, chống trầy xước.' },
-  ];
-
-  const product = mockProducts.find((p) => p.id === parseInt(id)) || {};
+  const [product, setProduct] = useState(null);
+  const [error, setError] = useState("");
+  const [product_id, setProductId] = useState(null);
+  const [quantity, setQuantity] = useState(1);
+  const [addModalOpen, setAddModalOpen] = useState(false);
+  const [message, setMessage] = useState("");
+  const [errors, setErrors] = useState("");
+  useEffect(() => {
+    const fetchProduct = async () => {
+      try {
+        const response = await All_Api.getCustomerProductById(id);
+        setProduct(response);
+      } catch (err) {
+        setError(err.response?.data || "Không tìm thấy sản phẩm");
+      }
+    };
+    fetchProduct();
+  }, [id]);
+// add to cart
+  const handleAddToCart = async () => {
+    if (quantity < 1) {
+      setMessage("Số lượng phải lớn hơn 0");
+      return;
+    }
+    if (quantity > product.stock) {
+      setMessage("Số lượng vượt quá tồn kho");
+      return;
+    }
+    try {
+      const data = { product_id, quantity };
+      await All_Api.addToCart(data);
+      alert("Thêm vào giỏ hàng thành công");
+      setAddModalOpen(false);
+      setMessage("");
+      setQuantity(1);
+    } catch (error) {
+      setErrors(error.response?.data || "Lỗi khi thêm vào giỏ hàng");
+    }
+  };
+  if (error) return <div className="p-6 text-center text-red-500">{error}</div>;
+  if (!product) return <div className="p-6 text-center">Đang tải...</div>;
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow">
-      <h2 className="text-xl font-semibold mb-4">Chi tiết sản phẩm</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <p><strong>ID:</strong> {product.id}</p>
-          <p><strong>Tên sản phẩm:</strong> {product.name}</p>
-          <p><strong>Danh mục:</strong> {product.category}</p>
-          <p><strong>Giá (VNĐ):</strong> {product.price?.toLocaleString('vi-VN')}</p>
+    <div className="p-6 bg-white rounded-2xl shadow-md max-w-3xl mx-auto">
+      <Link to="/customer/products" className="text-white hover:bg-sky-600 rounded p-3 bg-sky-500 mb-4 inline-block">← Quay lại</Link>
+            {/* Modal thêm vào giỏ */}
+      {addModalOpen && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-4">
+          <div className="bg-white p-6 rounded-2xl shadow-xl w-full max-w-md">
+            <h3 className="text-xl font-semibold text-gray-800 mb-4 text-center">
+              Thêm vào giỏ hàng
+            </h3>
+            {message && (
+              <div className="mb-4 text-red-500 font-medium text-center">
+                {message}
+              </div>
+            )}
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleAddToCart();
+              }}
+              className="space-y-4"
+            >
+              <label className="block text-gray-700 font-medium">
+                Số lượng:
+              </label>
+              <input
+                type="number"
+                min="1"
+                value={quantity}
+                onChange={(e) => setQuantity(parseInt(e.target.value))}
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Nhập số lượng"
+                required
+              />
+              <div className="flex justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setAddModalOpen(false);
+                    setMessage("");
+                  }}
+                  className="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition"
+                >
+                  Hủy
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition"
+                >
+                  Thêm
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
-        <div>
-          <p><strong>Tồn kho:</strong> {product.stock?.toLocaleString('vi-VN')}</p>
-          <p><strong>Nhà cung cấp:</strong> {product.supplier}</p>
-          <p><strong>Mô tả:</strong> {product.description}</p>
-          <p><strong>Thông số kỹ thuật:</strong> {product.specs}</p>
+      )}
+      <div className="flex flex-col md:flex-row gap-6">
+        <img src={product.image} alt={product.name} className="w-full md:w-1/2 h-64 object-cover rounded-xl shadow" />
+
+        <div className="flex-1 space-y-3">
+          <h1 className="text-2xl font-bold text-gray-800">{product.name}</h1>
+          <p><span className="font-medium">Danh mục:</span> {product.category_name}</p>
+          <p><span className="font-medium">Giá:</span> {Number(product.price).toLocaleString("vi-VN")} ₫</p>
+          <p><span className="font-medium">Tồn kho:</span> {product.stock} {product.unit}</p>
+          <p><span className="font-medium">Nhà cung cấp:</span> {Array.isArray(product.supplier_name) ? product.supplier_name.join(", ") : "N/A"}</p>
+
+          <button
+            onClick={() => {
+              setAddModalOpen(true);
+              setProductId(product.ProductID);
+            }}
+          className="w-full bg-green-500 text-white px-4 py-2 rounded-lg shadow hover:bg-green-600 transition">
+            Thêm vào giỏ
+          </button>
         </div>
-      </div>
-      <div className="mt-4 flex space-x-2">
-        <Link
-          to="/customer/products"
-          className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
-        >
-          Quay lại
-        </Link>
-        <button className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
-          Thêm vào giỏ
-        </button>
       </div>
     </div>
   );

@@ -19,7 +19,12 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         if User.objects.filter(email=value).exists():
             raise serializers.ValidationError("Email đã tồn tại")
         return value
-
+    def validate(self, attrs):
+            username = attrs.get('username')
+            email = attrs.get('email')
+            if not username:
+                attrs['username'] = email  # Set username mặc định từ email
+            return attrs
     def validate_password(self, value):
         if len(value) < 8:
             raise serializers.ValidationError("Mật khẩu phải có ít nhất 8 ký tự")
@@ -73,12 +78,11 @@ class CustomerSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Customer
-        fields = ['CustomerID', 'user', 'full_name', 'address', 'phone', 'email', 'is_block']
+        fields = ['CustomerID', 'user', 'full_name', 'address', 'phone', 'email', 'is_block','created_at','updated_at']
         read_only_fields = ['CustomerID', 'is_block']
 
     def validate_email(self, value):
         User = get_user_model()
-        # Nếu là update, loại trừ user hiện tại ra khỏi check trùng
         user_instance = getattr(self.instance, 'user', None)
         qs = User.objects.filter(email=value)
         if user_instance:
@@ -87,11 +91,15 @@ class CustomerSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Email này đã tồn tại trong hệ thống.")
         return value
     def update(self, instance, validated_data):
-        user_data = validated_data.pop('user', {})
-        email = user_data.get('email')
-        if email:
-            instance.user.email = email
-            instance.user.username = validated_data.get('full_name', instance.user.username)
+        user_data = validated_data.pop('user', None)
+        if user_data:
+            email = user_data.get('email')
+            if email:
+                instance.user.email = email
+            # Nếu muốn update username theo full_name
+            full_name = validated_data.get('full_name')
+            if full_name:
+                instance.user.username = full_name
             instance.user.save()
 
         # Cập nhật các trường của Customer
@@ -107,7 +115,7 @@ class SupplierSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Supplier
-        fields = ['SupplierID', 'user', 'full_name', 'address', 'phone', 'company_name', 'email', 'is_block']
+        fields = ['SupplierID', 'user', 'full_name', 'address', 'phone', 'company_name', 'email', 'is_block','created_at','updated_at']
         read_only_fields = ['SupplierID', 'is_block']
 
     def validate_email(self, value):
@@ -120,11 +128,15 @@ class SupplierSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Email này đã tồn tại trong hệ thống.")
         return value
     def update(self, instance, validated_data):
-        user_data = validated_data.pop('user', {})
-        email = user_data.get('email')
-        if email:
-            instance.user.email = email
-            instance.user.username = validated_data.get('full_name', instance.user.username)
+        user_data = validated_data.pop('user', None)
+        if user_data:
+            email = user_data.get('email')
+            if email:
+                instance.user.email = email
+            # Nếu muốn update username theo full_name
+            full_name = validated_data.get('full_name')
+            if full_name:
+                instance.user.username = full_name
             instance.user.save()
         
         instance.full_name = validated_data.get('full_name', instance.full_name)
@@ -138,39 +150,6 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = ['id', 'email','username', 'role', 'is_block']
 
-class UserUpdateSerializer(serializers.ModelSerializer):
-    full_name = serializers.CharField(required=True)
-    address = serializers.CharField(required=False, allow_blank=True)
-    phone = serializers.CharField(required=False, allow_blank=True)
-
-    class Meta:
-        model = User
-        fields = ['full_name', 'address', 'phone']
-
-    def update(self, instance, validated_data):
-        full_name = validated_data.get('full_name')
-        address = validated_data.get('address', '')
-        phone = validated_data.get('phone', '')
-        # Update username nếu muốn
-        if full_name:
-            instance.username = full_name
-        instance.save()
-        # Update vào bảng phụ
-        if instance.role == "supplier":
-            supplier = Supplier.objects.filter(user=instance).first()
-            if supplier:
-                supplier.full_name = full_name
-                supplier.address = address
-                supplier.phone = phone
-                supplier.save()
-        elif instance.role == "customer":
-            customer = Customer.objects.filter(user=instance).first()
-            if customer:
-                customer.full_name = full_name
-                customer.address = address
-                customer.phone = phone
-                customer.save()
-        return instance
 
 class ChangePasswordSerializer(serializers.Serializer):
     old_password = serializers.CharField(required=True, write_only=True)

@@ -1,8 +1,57 @@
 import React, { useEffect, useState } from 'react';
 import All_Api from '../../api/AllApi';
 import { useNavigate } from 'react-router-dom';
+// ... (giữ nguyên phần import, useState, useEffect, các hàm handleX) ...
+
+
+
+const TableHeader = ({ columns }) => (
+  <thead className="hidden sm:table-header-group bg-gray-100">
+    <tr>
+      {columns.map((col) => (
+        <th
+          key={col}
+          className="px-4 py-2 text-left text-sm font-semibold text-gray-600 uppercase tracking-wider"
+        >
+          {col}
+        </th>
+      ))}
+    </tr>
+  </thead>
+);
+
+// Responsive TableRow (desktop = bảng, mobile = card)
+const TableRow = ({ data, columns, actionButtons }) => (
+  <>
+    {/* Desktop (table row) */}
+    <tr className="hidden sm:table-row border-b">
+      {columns.map((col) => (
+        <td key={col} className="px-4 py-2 text-sm text-gray-700 whitespace-nowrap">
+          {data[col]}
+        </td>
+      ))}
+      {actionButtons && <td className="px-4 py-2">{actionButtons}</td>}
+    </tr>
+
+    {/* Mobile (card) */}
+    <tr className="sm:hidden">
+      <td className="w-full px-4 py-3 border rounded-lg mb-3 shadow-sm bg-gray-50">
+        <div className="space-y-1">
+          {columns.map((col) => (
+            <div key={col} className="flex justify-between text-sm">
+              <span className="font-medium text-gray-600">{col}:</span>
+              <span className="text-gray-800">{data[col]}</span>
+            </div>
+          ))}
+          {actionButtons && <div className="mt-2 flex flex-wrap gap-2">{actionButtons}</div>}
+        </div>
+      </td>
+    </tr>
+  </>
+);
 
 const UserList = () => {
+
   const [supplier, setSupplier] = useState([]);
   const [customer, setCustomer] = useState([]);
   const [admin, setAdmin] = useState([]);
@@ -144,44 +193,12 @@ const handleAddSupplier = async (e) => {
     window.alert("Thêm supplier thất bại");
   }
 };
-  const TableHeader = ({ columns }) => (
-    <thead className="bg-gray-50 hidden sm:table-header-group">
-      <tr>
-        {columns.map((col) => (
-          <th
-            key={col}
-            className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-          >
-            {col}
-          </th>
-        ))}
-      </tr>
-    </thead>
-  );
 
-  // Helper: Responsive Table Row
-  const TableRow = ({ data, columns, actionButtons }) => (
-    <tr className="sm:table-row flex flex-col sm:flex-row mb-2 sm:mb-0 border-b sm:border-none">
-      {columns.map((col, idx) => (
-        <td
-          key={col}
-          className="px-4 py-2 sm:whitespace-nowrap text-sm flex-1 sm:table-cell flex items-center sm:block"
-        >
-          <span className="font-semibold block sm:hidden min-w-[100px]">{col}:</span>
-          {data[col]}
-        </td>
-      ))}
-      {actionButtons && (
-        <td className="flex flex-row gap-2 px-4 py-2 sm:table-cell">{actionButtons}</td>
-      )}
-    </tr>
-  );
-
-  // Column Definitions (for display and responsive)
   const adminColumns = ["ID", "Họ tên", "Email"];
   const supplierColumns = ["ID", "Họ tên", "Email"];
   const customerColumns = ["ID", "Họ tên", "Email"];
 return (
+  
     <div className="p-2 sm:p-4 max-w-[900px] mx-auto">
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-2 sm:mb-4 gap-2">
         <h1 className="text-2xl sm:text-3xl font-bold">Quản lý người dùng</h1>

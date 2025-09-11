@@ -3,7 +3,6 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 const UserContext = createContext();
 
 export const UserProvider = ({ children }) => {
-  // Lấy user từ localStorage/sessionStorage khi load app
   const getUser = () => {
     return (
       JSON.parse(localStorage.getItem("user")) ||
@@ -14,20 +13,25 @@ export const UserProvider = ({ children }) => {
 
   const [user, setUser] = useState(getUser());
 
+  // Hàm refresh user data từ storage
+  const refreshUser = () => {
+    const newUser = getUser();
+    setUser(newUser);
+  };
+
   // Khi user thay đổi, cập nhật vào storage
   useEffect(() => {
     if (user) {
-      // Ưu tiên lưu lại đúng nơi user từng đăng nhập
       if (localStorage.getItem("access")) {
         localStorage.setItem("user", JSON.stringify(user));
       } else if (sessionStorage.getItem("access")) {
-        sessionStorage.setItem("user", JSON.stringify(user));
+        sessionStorage.setItem("access", JSON.stringify(user));
       }
     }
   }, [user]);
 
   return (
-    <UserContext.Provider value={{ user, setUser }}>
+    <UserContext.Provider value={{ user, setUser, refreshUser }}>
       {children}
     </UserContext.Provider>
   );

@@ -2,9 +2,9 @@ from django.urls import path
 from .views import (
     RegisterView, LoginView, UserManagementViewSet, ManageProductViewSet, ProposalProductAdminViewSet, ProposalProductViewSet,
     OrderDetailViewSet, HistoryStockViewSet, CategoryViewSet, CartViewSet, SupplierCreateViewSet,
-    PurchaseCreateView, PaymentPurchaseCreateView, UpdateUserView, ChangePasswordView,
+    PurchaseCreateView, PaymentPurchaseCreateView, UpdateCustomerView, UpdateSupplierView, ChangePasswordView,
     ProductSupplierViewSet, ManagePurchaseViewSet, InventoryViewSet,SearchbyLocationViewSet,CombinedSearchViewSet,ReportViewSet,ReportRevenueViewSet,
-    SearchbyProductNameViewSet,InvoicePurchaseViewSet,InvoiceOrderViewSet
+    SearchbyProductNameViewSet,InvoicePurchaseViewSet,InvoiceOrderViewSet,CustomerProductViewSet
 )
 from rest_framework_simplejwt.views import TokenRefreshView
 
@@ -72,8 +72,15 @@ urlpatterns = [
     path('customer/cart/', CartViewSet.as_view({'get': 'list'}), name='cart-list'),
     path('customer/cart/add/', CartViewSet.as_view({'post': 'add_to_cart'}), name='cart-add'),
     path('customer/cart/remove/<int:pk>/', CartViewSet.as_view({'delete': 'remove_cartitem'}), name='cart-remove'),
+    path('customer/cart/update/<int:pk>/', CartViewSet.as_view({'put': 'update_cartitem_quantity'}), name='cart-update-quantity'),
+    # customer product
+    path('customer/products/', CustomerProductViewSet.as_view({'get': 'list'}), name='customer-product-list'),
+    path('customer/products/<int:pk>/', CustomerProductViewSet.as_view({'get': 'retrieve'}), name='customer-product-detail'),
     # profile
-    path('auth/user/update/', UpdateUserView.as_view(), name='update-user'),
+    path('auth/user/customer/', UpdateCustomerView.as_view({'get': 'retrieve'}), name='update-user'),
+    path('auth/user/supplier/', UpdateSupplierView.as_view({'get': 'retrieve'}), name='update-user'),
+    path('auth/user/update/customer/', UpdateCustomerView.as_view({'put': 'update'}), name='update-customer'),
+    path('auth/user/update/supplier/', UpdateSupplierView.as_view({'put': 'update'}), name='update-supplier'),
     path('auth/user/change-password/', ChangePasswordView.as_view(), name='change-password'),
     # search
     path('function/search/location/', SearchbyLocationViewSet.as_view({'get': 'list'}), name='search-by-location'),
