@@ -80,7 +80,7 @@ urlpatterns = [
     path('auth/user/customer/', UpdateCustomerView.as_view({'get': 'retrieve'}), name='update-user'),
     path('auth/user/supplier/', UpdateSupplierView.as_view({'get': 'retrieve'}), name='update-user'),
     path('auth/user/update/customer/', UpdateCustomerView.as_view({'put': 'update'}), name='update-customer'),
-    path('auth/user/update/supplier/', UpdateSupplierView.as_view({'put': 'update'}), name='update-supplier'),
+    path('auth/user/update/supplier/', UpdateSupplierView.as_view({'put': 'put'}), name='update-supplier'),
     path('auth/user/change-password/', ChangePasswordView.as_view(), name='change-password'),
     # search
     path('function/search/location/', SearchbyLocationViewSet.as_view({'get': 'list'}), name='search-by-location'),
