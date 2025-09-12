@@ -37,7 +37,7 @@ const Navbar = ({ toggleSidebar, isSidebarOpen }) => {
 
       {/* User info and logout button */}
       <div className="flex items-center space-x-4">
-        <span className="text-base hidden md:block">Xin chào, {user?.full_name || 'Khách'}</span>
+        <span className="text-base hidden md:block">Xin chào, {user?.full_name || 'Khách'} {"("+user?.role+")"}</span>
         <button
           onClick={handleLogout}
           className="bg-red-600 py-1 px-3 rounded-md hover:bg-red-700 transition-colors"

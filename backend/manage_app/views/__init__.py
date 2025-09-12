@@ -22,4 +22,4 @@ from .customer.cart import CartViewSet
 from .auth.auth_view import UpdateCustomerView,UpdateSupplierView,ChangePasswordView
 from .customer.product.product import CustomerProductViewSet
 # function
-from .function.search import SearchbyLocationViewSet,CombinedSearchViewSet,SearchbyProductNameViewSet
+from .function.search import SearchbyLocationViewSet,CombinedSearchViewSet,SearchbyProductNameViewSet,SearchbyUsernameViewSet

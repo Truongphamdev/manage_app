@@ -75,10 +75,11 @@ class UserLoginSerializer(serializers.Serializer):
 class CustomerSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(source='user.email')
     is_block = serializers.BooleanField(source='user.is_block', read_only=True)
+    role = serializers.CharField(source='user.role', read_only=True)
 
     class Meta:
         model = Customer
-        fields = ['CustomerID', 'user', 'full_name', 'address', 'phone', 'email', 'is_block','created_at','updated_at']
+        fields = ['CustomerID', 'user', 'full_name', 'address','role', 'phone', 'email', 'is_block','created_at','updated_at']
         read_only_fields = ['CustomerID', 'is_block']
 
     def validate_email(self, value):
@@ -112,10 +113,11 @@ class CustomerSerializer(serializers.ModelSerializer):
 class SupplierSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(source='user.email')
     is_block = serializers.BooleanField(source='user.is_block', read_only=True)
+    role = serializers.CharField(source='user.role', read_only=True)
 
     class Meta:
         model = Supplier
-        fields = ['SupplierID', 'user', 'full_name', 'address', 'phone', 'company_name', 'email', 'is_block','created_at','updated_at']
+        fields = ['SupplierID', 'user', 'full_name', 'address', 'role', 'phone', 'company_name', 'email', 'is_block','created_at','updated_at']
         read_only_fields = ['SupplierID', 'is_block']
 
     def validate_email(self, value):
