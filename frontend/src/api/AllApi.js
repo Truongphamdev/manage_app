@@ -51,7 +51,7 @@ const All_Api = {
     getSupplierProfile: () => axiosClient.get('/auth/user/supplier/'),
     updateSupplierProfile: (data) => axiosClient.put('/auth/user/update/supplier/', data),
     // đổi mật khẩu
-    changePassword: (data) => axiosClient.post('/auth/user/change-password/', data),
+    changePassword: (data) => axiosClient.put('/auth/user/change-password/', data),
     // supplier
     getSupplierProducts: () => axiosClient.get('/supplier/products/'),
     getSupplierProductById: (id) => axiosClient.get(`/supplier/products/${id}/`),
@@ -73,5 +73,7 @@ const All_Api = {
     searchByProductName: (params) => axiosClient.get('/function/search/productname/', { params }),
     // kết hợp nhiều tiêu chí tìm kiếm
     combinedSearch: (params) => axiosClient.get('/function/search/combined/', { params }),
+    // search by username
+    searchByUsername: (params) => axiosClient.get('/function/search/username/', { params }),
 }
 export default All_Api;

@@ -1,7 +1,7 @@
 from rest_framework import viewsets,status
 from rest_framework.response import Response
-from ...models import Inventory,Product
-from ...serializers import ProductSerializer,InventorySerializer
+from ...models import Inventory,Product,User,Customer,Supplier
+from ...serializers import ProductSerializer,InventorySerializer,CustomerSerializer,SupplierSerializer,UserSerializer
 
 import unicodedata
 
@@ -49,3 +49,21 @@ class CombinedSearchViewSet(viewsets.ViewSet):
 
         serializer = ProductSerializer(products.distinct(), many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+class SearchbyUsernameViewSet(viewsets.ViewSet):
+    def list(self, request):
+        search = request.query_params.get('search', '')
+        users = User.objects.all()
+        users = users.filter(username__icontains=search)
+        user_data = UserSerializer(users, many=True)
+
+        customer = Customer.objects.filter(full_name__icontains=search)
+        customer_data = CustomerSerializer(customer, many=True)
+
+        supplier = Supplier.objects.filter(full_name__icontains=search)
+        supplier_data = SupplierSerializer(supplier, many=True)
+        return Response(
+            {
+            "users": user_data.data,
+            "customers": customer_data.data,
+            "suppliers": supplier_data.data
+        }, status=status.HTTP_200_OK)

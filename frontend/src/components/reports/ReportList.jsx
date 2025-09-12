@@ -30,12 +30,11 @@ const InventoryReport = () => {
     try {
       const params = { start_date: startDate, end_date: endDate };
       const response = await All_Api.exportReportRevenue(params);
-      const blob = new Blob([response.data], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
+      const url = window.URL.createObjectURL(new Blob([response]));
+      const link = document.createElement("a");
       link.href = url;
-      link.setAttribute('download', 'bao_cao_doanh_thu.docx');
-    document.body.appendChild(link);
+      link.setAttribute("download", "bao_cao_doanh_thu.docx");
+      document.body.appendChild(link);
     console.log("Xuất báo cáo doanh thu:", response);
     link.click();
     window.URL.revokeObjectURL(url);

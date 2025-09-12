@@ -4,7 +4,7 @@ from .views import (
     OrderDetailViewSet, HistoryStockViewSet, CategoryViewSet, CartViewSet, SupplierCreateViewSet,
     PurchaseCreateView, PaymentPurchaseCreateView, UpdateCustomerView, UpdateSupplierView, ChangePasswordView,
     ProductSupplierViewSet, ManagePurchaseViewSet, InventoryViewSet,SearchbyLocationViewSet,CombinedSearchViewSet,ReportViewSet,ReportRevenueViewSet,
-    SearchbyProductNameViewSet,InvoicePurchaseViewSet,InvoiceOrderViewSet,CustomerProductViewSet
+    SearchbyProductNameViewSet,InvoicePurchaseViewSet,InvoiceOrderViewSet,CustomerProductViewSet,SearchbyUsernameViewSet
 )
 from rest_framework_simplejwt.views import TokenRefreshView
 
@@ -80,11 +80,12 @@ urlpatterns = [
     path('auth/user/customer/', UpdateCustomerView.as_view({'get': 'retrieve'}), name='update-user'),
     path('auth/user/supplier/', UpdateSupplierView.as_view({'get': 'retrieve'}), name='update-user'),
     path('auth/user/update/customer/', UpdateCustomerView.as_view({'put': 'update'}), name='update-customer'),
-    path('auth/user/update/supplier/', UpdateSupplierView.as_view({'put': 'put'}), name='update-supplier'),
+    path('auth/user/update/supplier/', UpdateSupplierView.as_view({'put': 'update'}), name='update-supplier'),
     path('auth/user/change-password/', ChangePasswordView.as_view(), name='change-password'),
     # search
     path('function/search/location/', SearchbyLocationViewSet.as_view({'get': 'list'}), name='search-by-location'),
     path('function/search/combined/', CombinedSearchViewSet.as_view({'get': 'list'}), name='combined-search'),
     path('function/search/productname/', SearchbyProductNameViewSet.as_view({'get': 'list'}), name='search-by-productname'),
+    path('function/search/username/', SearchbyUsernameViewSet.as_view({'get': 'list'}), name='search-by-username'),
     
 ]

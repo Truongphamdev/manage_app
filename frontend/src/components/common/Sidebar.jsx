@@ -8,7 +8,7 @@ const Sidebar = ({ menuItems, isOpen, toggleSidebar }) => {
 
     <div>
       {/* Sidebar for desktop */}
-      <div className="hidden md:block w-64 bg-gray-800 text-white min-h-screen p-4">
+      <div className="hidden md:block h-full w-64 bg-gray-800 text-white p-4">
         <h2 className="text-xl font-bold mb-6">Menu</h2>
         <ul className="space-y-2">
           {menuItems.map((item) => (

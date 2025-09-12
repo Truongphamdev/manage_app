@@ -42,7 +42,8 @@ import { InvoicePurchase } from './components/reports/invoice/InvoicePurchase';
 import { InvoiceOrder } from './components/reports/invoice/InvoiceOrder';
 import { InvoicePurchaseDetail } from './components/reports/invoice/InvoicePurchaseDetail';
 import { InvoiceOrderDetail } from './components/reports/invoice/InvoiceOrderDetail';
-import SupplierProfile from './components/supplier/profile/SupplierProfile';
+import { Password } from './components/password/Password';
+// import SupplierProfile from './components/supplier/profile/SupplierProfile';
 
 function App() {
   return (
@@ -85,10 +86,11 @@ function App() {
               <Route path="/supplier/products/:id" element={<SupplierProductDetail />} />
               <Route path="/supplier/purchases" element={<SupplierOrderList />} />
               <Route path="/supplier/purchases/:id" element={<SupplierOrderDetail />} />
-              <Route path="/supplier/reports" element={<SupplierReportList />} />
-              <Route path="/supplier/reports/:id" element={<SupplierReportDetail />} />
+              {/* <Route path="/supplier/reports" element={<SupplierRE />} />
+              <Route path="/supplier/reports/:id" element={<SupplierReportDetail />} /> */}
               <Route path="/supplier/profile" element={<SupplierProfile />} />
               <Route path="/supplier/profile/edit" element={<SupplierProfileEdit />} />
+              <Route path='/supplier/profile/changepassword' element={<Password />} />
             </Route>
           </Route>
 
@@ -104,6 +106,7 @@ function App() {
               <Route path="/customer/payments" element={<CustomerPaymentList />} />
               <Route path="/customer/profile" element={<CustomerProfile />} />
               <Route path="/customer/profile/edit" element={<CustomerProfileEdit />} />
+              <Route path='/customer/profile/changepassword' element={<Password />} />
             </Route>
           </Route>
         </Routes>
