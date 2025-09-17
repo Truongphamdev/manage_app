@@ -7,18 +7,22 @@ import { useUser } from '../../../api/context/UserContext';
 const CustomerProfileEdit = () => {
   const { setUser } = useUser();
   const [profile, setProfile] = useState({});
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
     useEffect(()=> {
     fetchProfile();
   },[])
   const fetchProfile = async () => {
     try {
+      setLoading(true);
       const response = await All_Api.getUserProfile();
       setProfile(response);
       return response;
     }
     catch (error) {
       console.error("Error fetching profile:", error);
+    }
+    finally {
+      setLoading(false);  
     }
   }
 

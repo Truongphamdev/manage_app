@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 from django.shortcuts import get_object_or_404
 from ...permissions import IsCustomerRole
-from ...models import Cart, CartItem, Product,Customer
+from ...models import Cart, CartItem, Product,Customer,Inventory
 from ...serializers import CartSerializer, CartItemSerializer
 
 class CartViewSet(viewsets.ViewSet):
@@ -19,6 +19,7 @@ class CartViewSet(viewsets.ViewSet):
         cart, _ = Cart.objects.get_or_create(customer=Customer.objects.get(user=request.user))
         product_id = request.data.get('product_id')
         quantity = request.data.get('quantity', 1)
+        location = request.data.get('location', None)
 
         # Validate product
         product = get_object_or_404(Product, ProductID=product_id)
@@ -31,11 +32,15 @@ class CartViewSet(viewsets.ViewSet):
             return Response({"error": "Số lượng phải là số nguyên dương"}, status=status.HTTP_400_BAD_REQUEST)
         if quantity <= 0:
             return Response({"error": "Số lượng phải là số nguyên dương"}, status=status.HTTP_400_BAD_REQUEST)
-
-        cart_item, created = CartItem.objects.get_or_create(cart=cart, product=product,defaults={'quantity': quantity, 'price': product.price * quantity})
+        inventory = None
+        if location:
+            inventory = get_object_or_404(Inventory, id=location)
+        cart_item, created = CartItem.objects.get_or_create(cart=cart, product=product,location=inventory,defaults={'quantity': quantity, 'price': product.price * quantity})
         if not created:
             cart_item.quantity += quantity
             cart_item.price = product.price * cart_item.quantity
+            if inventory:
+                cart_item.location = inventory
             cart_item.save()
         return Response(CartSerializer(cart).data, status=status.HTTP_201_CREATED)
 

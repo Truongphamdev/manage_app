@@ -20,6 +20,8 @@ const All_Api = {
     updateProduct: (id, data) => axiosClient.put(`/admin/products/${id}/`, data),
     deleteProduct: (id) => axiosClient.delete(`/admin/products/${id}/`),
     getFormdata: () => axiosClient.get('/admin/products/form-data/'),
+    // dashboard
+    getDashboardData: () => axiosClient.get('/admin/dashboard/'),
     // get invoices
     getInvoicesPurchase: () => axiosClient.get('/admin/invoices/purchase'),
     getInvoicePurchaseById: (id) => axiosClient.get(`/admin/invoices/purchase/${id}/`),
@@ -39,6 +41,17 @@ const All_Api = {
     getReportRevenue: (params) => axiosClient.get('/admin/report/revenue/', { params }),
     exportReportRevenue: (params) => axiosClient.get('/admin/report/revenue/export/', { params,responseType: 'blob' }),
     // order
+    getOrdersAdmin: (params) => axiosClient.get('/admin/orders/',  params ),
+    getOrderAdminById: (id) => axiosClient.get(`/admin/orders/${id}/`),
+    getOrderConfirm :()=>axiosClient.get('/admin/orders/confirm/'),
+    getOrderConfirmById :(id)=>axiosClient.get(`/admin/orders/confirm/${id}/`),
+    approveOrder :(id)=>axiosClient.post(`/admin/orders/confirm/${id}/approve/`),
+    rejectOrder :(id)=>axiosClient.post(`/admin/orders/confirm/${id}/reject/`),
+    // category
+    getCategories: () => axiosClient.get('/admin/categories/'),
+    addCategory: (data) => axiosClient.post('/admin/categories/', data),
+    updateCategory: (id, data) => axiosClient.put(`/admin/categories/${id}/`, data),
+    deleteCategory: (id) => axiosClient.delete(`/admin/categories/${id}/`),
     // admin purchase
     createPurchase: (data) => axiosClient.post('/admin/purchase/', data),
     getPurchaseById: (id) => axiosClient.get(`/admin/purchase/${id}/`),
@@ -55,6 +68,7 @@ const All_Api = {
     // supplier
     getSupplierProducts: () => axiosClient.get('/supplier/products/'),
     getSupplierProductById: (id) => axiosClient.get(`/supplier/products/${id}/`),
+    getDashboardDataSupplier: () => axiosClient.get('/supplier/dashboard/'),
     // manage purchase
     getPurchases: () => axiosClient.get('/supplier/purchases/'),
     getPurchaseDetailById: (id) => axiosClient.get(`/supplier/purchases/${id}/`),
@@ -67,6 +81,14 @@ const All_Api = {
     addToCart: (data) => axiosClient.post('/customer/cart/add/', data),
     removeCartItem: (id) => axiosClient.delete(`/customer/cart/remove/${id}/`),
     updateCartItemQuantity: (id, data) => axiosClient.put(`/customer/cart/update/${id}/`, data),
+    // order
+    createOrder: (data) => axiosClient.post('/customer/orders/', data),
+    getOrders: (data) => axiosClient.post('/customer/orders/detail/', data),
+    getAllOrders: () => axiosClient.get('/customer/orders/all/'),
+    getOrderById: (id) => axiosClient.get(`/customer/orders/all/${id}/`),
+    // payment
+    generateQRCode:(amount) => axiosClient.get('/customer/orders/payment/qrcode/', { params: { amount } }),
+    getPaymentHistory: () => axiosClient.get('/customer/orders/payment/'),
     // search
     searchByLocation: (params) => axiosClient.get('/function/search/location/', { params }),
     // search by product name
@@ -75,5 +97,8 @@ const All_Api = {
     combinedSearch: (params) => axiosClient.get('/function/search/combined/', { params }),
     // search by username
     searchByUsername: (params) => axiosClient.get('/function/search/username/', { params }),
+    // search by order (admin)
+    searchByOrder: (params) => axiosClient.get('/function/search/order/', { params }),
+
 }
 export default All_Api;

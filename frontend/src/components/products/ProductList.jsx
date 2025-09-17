@@ -56,7 +56,8 @@ const ProductList = () => {
   "Mét",
   "Đôi",
   "Cặp",
-  "Bao"
+  "Bao",
+  "Viên"
 ];
 const [search, setSearch] = useState('');
 useEffect(() => {

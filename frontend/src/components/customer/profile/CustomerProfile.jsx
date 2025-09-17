@@ -13,10 +13,11 @@ const CustomerProfile = () => {
       setLoading(true);
       const response = await All_Api.getUserProfile();
       setProfile(response);
-      setLoading(false);
     }
     catch (error) {
       console.error("Error fetching profile:", error);
+    }
+    finally {
       setLoading(false);
     }
   }

@@ -1,45 +1,88 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import All_Api from '../../../api/AllApi';
 
 const CustomerOrderList = () => {
-  const mockOrders = [
-    { id: 1, total: 10000000, status: 'Pending', date: '2025-09-01', items: [{ product: 'Xi măng PC40', quantity: 10 }, { product: 'Gạch đỏ 4 lỗ', quantity: 100 }] },
-    { id: 2, total: 20000000, status: 'Confirmed', date: '2025-09-02', items: [{ product: 'Thép phi 16', quantity: 50 }] },
-    { id: 3, total: 15000000, status: 'Confirmed', date: '2025-09-03', items: [{ product: 'Gạch đỏ 4 lỗ', quantity: 200 }, { product: 'Thép phi 16', quantity: 30 }] },
-    { id: 4, total: 25000000, status: 'Delivered', date: '2025-09-04', items: [{ product: 'Xi măng PC40', quantity: 20 }] },
-    { id: 5, total: 30000000, status: 'Pending', date: '2025-09-05', items: [{ product: 'Cát xây dựng', quantity: 10 }, { product: 'Đá 1x2', quantity: 5 }] },
-    { id: 6, total: 18000000, status: 'Confirmed', date: '2025-09-06', items: [{ product: 'Sơn nước Dulux', quantity: 5 }] },
-    { id: 7, total: 22000000, status: 'Delivered', date: '2025-09-07', items: [{ product: 'Gạch lát nền 60x60', quantity: 100 }] },
-    { id: 8, total: 17000000, status: 'Pending', date: '2025-09-08', items: [{ product: 'Thép phi 12', quantity: 50 }, { product: 'Xi măng PC50', quantity: 10 }] },
-    { id: 9, total: 19000000, status: 'Confirmed', date: '2025-09-09', items: [{ product: 'Gạch đỏ 6 lỗ', quantity: 150 }] },
-    { id: 10, total: 24000000, status: 'Delivered', date: '2025-09-10', items: [{ product: 'Xi măng PC40', quantity: 15 }, { product: 'Sơn nước Dulux', quantity: 3 }] },
-  ];
+  const [allOrders, setAllOrders] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const fetchOrders = async () => {
+      setLoading(true);
+      try {
+        const response = await All_Api.getAllOrders();
+        setAllOrders(response);
+      } catch (error) {
+        console.error('Error fetching orders:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchOrders();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="text-center py-8 text-blue-700 font-medium">
+        Đang tải đơn hàng...
+      </div>
+    );
+  }
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow">
-      <h2 className="text-xl font-semibold mb-4">Danh sách đơn hàng</h2>
-      <div className="overflow-x-auto">
-        <table className="min-w-full bg-white border">
-          <thead>
+    <div className="bg-gradient-to-br from-blue-50 to-white p-4 sm:p-6 rounded-2xl shadow-lg">
+      <h2 className="text-2xl font-bold mb-6 text-blue-800">
+        📦 Danh sách đơn hàng
+      </h2>
+
+      {/* Bảng desktop */}
+      <div className="hidden sm:block overflow-x-auto">
+        <table className="min-w-full border-collapse rounded-lg overflow-hidden text-sm">
+          <thead className="bg-blue-100 text-blue-900">
             <tr>
-              <th className="py-2 px-4 border">ID</th>
-              <th className="py-2 px-4 border">Tổng tiền (VNĐ)</th>
-              <th className="py-2 px-4 border">Trạng thái</th>
-              <th className="py-2 px-4 border">Ngày đặt</th>
-              <th className="py-2 px-4 border">Hành động</th>
+              <th className="py-3 px-4 text-left">ID</th>
+              <th className="py-3 px-4 text-left">Tổng tiền (VNĐ)</th>
+              <th className="py-3 px-4 text-left">Trạng thái</th>
+              <th className="py-3 px-4 text-left">Ngày đặt</th>
+              <th className="py-3 px-4 text-center">Hành động</th>
             </tr>
           </thead>
           <tbody>
-            {mockOrders.map((order) => (
-              <tr key={order.id}>
-                <td className="py-2 px-4 border">{order.id}</td>
-                <td className="py-2 px-4 border">{order.total.toLocaleString('vi-VN')}</td>
-                <td className="py-2 px-4 border">{order.status}</td>
-                <td className="py-2 px-4 border">{order.date}</td>
-                <td className="py-2 px-4 border">
+            {allOrders.map((order, idx) => (
+              <tr
+                key={order.orderID}
+                className={
+                  idx % 2 === 0
+                    ? 'bg-white hover:bg-blue-50 transition'
+                    : 'bg-blue-50 hover:bg-blue-100 transition'
+                }
+              >
+                <td className="py-2 px-4 text-gray-700">{order.orderID}</td>
+                <td className="py-2 px-4 text-gray-700">
+                  {Number(order.total_amount).toLocaleString('vi-VN')} VNĐ
+                </td>
+                <td
+                  className={`py-2 px-4 font-medium ${
+                    order.status === 'paid'
+                      ? 'text-green-600'
+                      : order.status === 'unpaid'
+                      ? 'text-yellow-600'
+                      : 'text-red-600'
+                  }`}
+                >
+                  {order.status === 'paid'
+                    ? 'Đã thanh toán'
+                    : order.status === 'unpaid'
+                    ? 'Chưa thanh toán'
+                    : 'Hủy'}
+                </td>
+                <td className="py-2 px-4 text-gray-700">
+                  {new Date(order.order_date).toLocaleDateString('vi-VN')}
+                </td>
+                <td className="py-2 px-4 text-center">
                   <Link
-                    to={`/customer/orders/${order.id}`}
-                    className="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600"
+                    to={`/customer/orders/${order.orderID}`}
+                    className="inline-block bg-blue-600 text-white px-3 py-1 rounded-md hover:bg-blue-700 shadow transition"
                   >
                     Xem chi tiết
                   </Link>
@@ -48,6 +91,43 @@ const CustomerOrderList = () => {
             ))}
           </tbody>
         </table>
+      </div>
+
+      {/* Mobile card view */}
+      <div className="sm:hidden space-y-4">
+        {allOrders.map((order) => (
+          <div
+            key={order.orderID}
+            className="border border-blue-200 bg-white rounded-xl p-4 shadow hover:shadow-md transition"
+          >
+            <p className="text-blue-800 font-semibold">ID: {order.orderID}</p>
+            <p className="text-gray-700">
+              <span className="font-semibold">Tổng tiền:</span>{' '}
+              {Number(order.total_amount).toLocaleString('vi-VN')} VNĐ
+            </p>
+            <p
+              className={`font-medium ${
+                order.status === 'paid'
+                  ? 'text-green-600'
+                  : order.status === 'unpaid'
+                  ? 'text-yellow-600'
+                  : 'text-red-600'
+              }`}
+            >
+              Trạng thái: {order.status === 'paid' ? 'Đã thanh toán' : order.status === 'unpaid' ? 'Chưa thanh toán' : 'Hủy'}
+            </p>
+            <p className="text-gray-700">
+              <span className="font-semibold">Ngày đặt:</span>{' '}
+              {new Date(order.order_date).toLocaleDateString('vi-VN')}
+            </p>
+            <Link
+              to={`/customer/orders/${order.orderID}`}
+              className="mt-3 inline-block bg-blue-600 text-white px-3 py-1 rounded-md hover:bg-blue-700 shadow transition"
+            >
+              Xem chi tiết
+            </Link>
+          </div>
+        ))}
       </div>
     </div>
   );

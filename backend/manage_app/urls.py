@@ -4,7 +4,9 @@ from .views import (
     OrderDetailViewSet, HistoryStockViewSet, CategoryViewSet, CartViewSet, SupplierCreateViewSet,
     PurchaseCreateView, PaymentPurchaseCreateView, UpdateCustomerView, UpdateSupplierView, ChangePasswordView,
     ProductSupplierViewSet, ManagePurchaseViewSet, InventoryViewSet,SearchbyLocationViewSet,CombinedSearchViewSet,ReportViewSet,ReportRevenueViewSet,
-    SearchbyProductNameViewSet,InvoicePurchaseViewSet,InvoiceOrderViewSet,CustomerProductViewSet,SearchbyUsernameViewSet
+    SearchbyProductNameViewSet,InvoicePurchaseViewSet,InvoiceOrderViewSet,CustomerProductViewSet,SearchbyUsernameViewSet,
+    OrderCreateViewSet,PaymentOrderCreateView,AllOrderViewSet,SearchbyUsernameOrderViewSet,
+    ConfirmOrderViewSet,DashboardViewSet,SupplierDashboardViewSet,AllOrderView,PaymentHistoryView
 )
 from rest_framework_simplejwt.views import TokenRefreshView
 
@@ -35,7 +37,8 @@ urlpatterns = [
     path('admin/report/export/', ReportViewSet.as_view({'get':'export_report'}), name='stock-report-export'),
     path('admin/report/revenue/', ReportRevenueViewSet.as_view({'get':'list'}), name='revenue-report'),
     path('admin/report/revenue/export/', ReportRevenueViewSet.as_view({'get':'export_report'}), name='revenue-report-export'),
-
+    # Admin dashboard
+    path('admin/dashboard/', DashboardViewSet.as_view({'get':'list'}), name='dashboard'),
     # Admin proposal
     path('admin/proposal/<int:pk>/', ProposalProductAdminViewSet.as_view({'patch': 'partial_update'}), name='proposal-admin'),
     # admin invoice
@@ -48,9 +51,15 @@ urlpatterns = [
     path('admin/invoices/order/<int:pk>/', InvoiceOrderViewSet.as_view({'get': 'retrieve'}), name='retrieve-invoice'),
     path('admin/invoices/order/<int:pk>/delete/', InvoiceOrderViewSet.as_view({'delete': 'destroy'}), name='delete-invoice'),
     path('admin/invoices/order/<int:pk>/export/', InvoiceOrderViewSet.as_view({'get': 'export'}), name='export-invoice'),
-
+    # manage order
+    path('admin/orders/', AllOrderViewSet.as_view({'get': 'list'}), name='list-orders'),
+    path('admin/orders/<int:pk>/', AllOrderViewSet.as_view({'get': 'retrieve'}), name='retrieve-order'),
+    path('admin/orders/confirm/', ConfirmOrderViewSet.as_view({'get': 'list'}), name='list-confirm-orders'),
+    path('admin/orders/confirm/<int:pk>/', ConfirmOrderViewSet.as_view({'get': 'retrieve'}), name='retrieve-confirm-order'),
+    path('admin/orders/confirm/<int:pk>/approve/', ConfirmOrderViewSet.as_view({'post': 'confirm_approve'}), name='approve-order'),
+    path('admin/orders/confirm/<int:pk>/reject/', ConfirmOrderViewSet.as_view({'post': 'confirm_reject'}), name='reject-order'),
     # Admin category
-    path('admin/categories/', CategoryViewSet.as_view({'post': 'create'}), name='add-category'),
+    path('admin/categories/', CategoryViewSet.as_view({'get': 'list', 'post': 'create'}), name='list-categories'),
     path('admin/categories/<int:pk>/', CategoryViewSet.as_view({'put': 'update', 'delete': 'destroy'}), name='update-delete-category'),
     # purchase
     path('admin/purchase/', PurchaseCreateView.as_view({'post': 'create'}), name='create'),
@@ -67,6 +76,8 @@ urlpatterns = [
     path('supplier/orders/', OrderDetailViewSet.as_view({'get': 'list'}), name='list-orders'),
     path('supplier/orders/<int:pk>/', OrderDetailViewSet.as_view({'get': 'retrieve'}), name='retrieve-order'),
     path('supplier/history-stock/', HistoryStockViewSet.as_view({'get': 'list'}), name='list-history-stock'),
+    # supplier dashboard
+    path('supplier/dashboard/', SupplierDashboardViewSet.as_view({'get':'list'}), name='dashboard-supplier'),
 
     # Customer cart
     path('customer/cart/', CartViewSet.as_view({'get': 'list'}), name='cart-list'),
@@ -76,6 +87,14 @@ urlpatterns = [
     # customer product
     path('customer/products/', CustomerProductViewSet.as_view({'get': 'list'}), name='customer-product-list'),
     path('customer/products/<int:pk>/', CustomerProductViewSet.as_view({'get': 'retrieve'}), name='customer-product-detail'),
+    # customer order
+    path('customer/orders/', OrderCreateViewSet.as_view({'post': 'create'}), name='create-order'),
+    path('customer/orders/detail/',OrderCreateViewSet.as_view({'post': 'selected_items'}), name='list-order'),
+    path('customer/orders/all/',AllOrderView.as_view({'get': 'list'}), name='all-orders'),
+    path('customer/orders/all/<int:pk>/', AllOrderView.as_view({'get': 'retrieve'}), name='all-order-detail'),
+    # payment
+    path('customer/orders/payment/qrcode/', PaymentOrderCreateView.as_view({'get': 'get'}), name='payment-qrcode'),
+    path('customer/orders/payment/', PaymentHistoryView.as_view({'get': 'list'}), name='payment-history'),
     # profile
     path('auth/user/customer/', UpdateCustomerView.as_view({'get': 'retrieve'}), name='update-user'),
     path('auth/user/supplier/', UpdateSupplierView.as_view({'get': 'retrieve'}), name='update-user'),
@@ -87,5 +106,6 @@ urlpatterns = [
     path('function/search/combined/', CombinedSearchViewSet.as_view({'get': 'list'}), name='combined-search'),
     path('function/search/productname/', SearchbyProductNameViewSet.as_view({'get': 'list'}), name='search-by-productname'),
     path('function/search/username/', SearchbyUsernameViewSet.as_view({'get': 'list'}), name='search-by-username'),
+    path('function/search/order/', SearchbyUsernameOrderViewSet.as_view({'get': 'list'}), name='search-by-order'),
     
 ]

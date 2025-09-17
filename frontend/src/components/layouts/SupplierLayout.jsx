@@ -15,8 +15,6 @@ const SupplierLayout = () => {
     { name: 'Dashboard', path: '/dashboard/supplier' },
     { name: 'Quản lý sản phẩm', path: '/supplier/products' },
     { name: 'Đơn hàng', path: '/supplier/purchases' },
-    { name: 'Tồn kho', path: '/supplier/inventory' },
-    { name: 'Báo cáo doanh số', path: '/supplier/reports' },
     { name: 'Thông tin cá nhân', path: '/supplier/profile' },
   ];
 

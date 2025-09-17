@@ -1,6 +1,8 @@
 from rest_framework import serializers
-from ...models import Purchase,InvoicePurchase,PaymentPurchase,PurchaseDetail,Inventory, Product, Supplier,StockImport
+from ...models import Purchase,InvoicePurchase,PaymentPurchase,PurchaseDetail,Inventory, Product, Supplier,StockImport,OrderDetail
+from django.db.models import Sum
 import django.db.models as models
+from django.db import transaction
 from django.utils.timezone import now
 class PurchaseSerializer(serializers.ModelSerializer):
     class Meta:
@@ -26,11 +28,26 @@ class ProductSerializer(serializers.ModelSerializer):
     suppliers = serializers.SerializerMethodField()
     category = serializers.SerializerMethodField()
     company_name = serializers.SerializerMethodField()
+    quantity_stock = serializers.SerializerMethodField()
 
     class Meta:
         model = Product
-        fields = '__all__'
-
+        fields = 'suppliers', 'category', 'company_name', 'ProductID', 'name', 'image', 'price', 'cost_price', 'unit', 'quantity_stock'
+    def get_quantity_stock(self, obj):
+        total_in_stock = Inventory.objects.filter(product=obj).aggregate(total=Sum('quantity'))['total'] or 0
+        # Tổng xuất kho ở các đơn hàng đã thanh toán
+        total_out_stock = OrderDetail.objects.filter(
+            product=obj,
+            order__invoiceorder__status='unpaid'
+        ).aggregate(total=Sum('quantity'))['total'] or 0
+        total_import_stock = PurchaseDetail.objects.filter(
+            product=obj,
+            purchase__invoicepurchase__status='unpaid'
+        ).aggregate(total=Sum('quantity'))['total'] or 0
+        print("total_import_stock", total_import_stock)
+        # Tồn kho thực tế
+        stock = (total_in_stock + total_out_stock) - total_import_stock
+        return stock
     def get_suppliers(self, obj):
         # Trả về danh sách NCC dạng object (id, full_name, company_name)
         return [
@@ -73,7 +90,7 @@ class CreatePurchaseSerializer(serializers.Serializer):
     payment_method = serializers.ChoiceField(choices=[('cash', 'Cash'), ('bank_transfer', 'Bank Transfer')])
     supplier = serializers.PrimaryKeyRelatedField(queryset=Supplier.objects.all())
     purchase_date = serializers.DateField(read_only=True, default=now().date())
-    total_amount = serializers.DecimalField(max_digits=10, decimal_places=2)
+    total_amount = serializers.DecimalField(max_digits=30, decimal_places=2)
     location = serializers.ChoiceField(choices=LOCATION_CHOICES)
     products = PurchaseProductSerializer(many=True)
     
@@ -106,57 +123,74 @@ class CreatePurchaseSerializer(serializers.Serializer):
         location = validated_data['location']
         products_data = validated_data['products']
         payment_method = validated_data.get('payment_method', 'cash')
-        purchase = Purchase.objects.create(
-            supplier = supplier,
-            purchase_date = purchase_date,
-            total_amount = total_amount,
-        )
-        for item in products_data:
-            product_item = item['product']
-            quantity = item['quantity']
-            cost_price = item['cost_price']
-            Product.objects.filter(pk=product_item.pk).update(cost_price=cost_price,quantity_stock=models.F('quantity_stock') + quantity)
-            if not product_item.suppliers.filter(pk=supplier.pk).exists():
-                product_item.suppliers.add(supplier)
-            # cập nhật mua hàng chi tiết
-            PurchaseDetail.objects.create(
-                purchase = purchase,
-                product = product_item,
-                quantity = quantity,
-                price = cost_price,
-                total = quantity * cost_price,
-            )
-            # cập nhật tồn kho
-            inventory,created = Inventory.objects.get_or_create(
-                product = product_item,
-                location = location,
-                defaults={'quantity': quantity}
-            )
-            if not created:
-                inventory.quantity += quantity
-                inventory.save()
-            # tạo stockImport
-            StockImport.objects.create(
-                product = product_item,
-                quantity = quantity,
-                cost_price = cost_price,
+        with transaction.atomic():
+            purchase = Purchase.objects.create(
                 supplier = supplier,
+                purchase_date = purchase_date,
+                total_amount = total_amount,
             )
-        if payment_method == 'cash':
-            InvoicePurchase.objects.create(
-                purchase=purchase,
-                invoice_date=purchase_date,
-                method='cash',
-                status='paid',
-                total_amount=total_amount,
-            )
-            PaymentPurchase.objects.create(
-                purchase=purchase,
-                payment_method='cash',
-                amount=total_amount,
-                status='completed',
-            )
-        return purchase
+            for item in products_data:
+                product_item = item['product']
+                quantity = item['quantity']
+                cost_price = item['cost_price']
+                                # cập nhật tồn kho
+                inventory,created = Inventory.objects.get_or_create(
+                    product = product_item,
+                    location = location,
+                    defaults={'quantity': quantity}
+                )
+                if not created:
+                    inventory.quantity += quantity
+                    inventory.save()
+                Product.objects.filter(pk=product_item.pk).update(cost_price=cost_price,quantity_stock=models.F('quantity_stock') + quantity)
+                if not product_item.suppliers.filter(pk=supplier.pk).exists():
+                    product_item.suppliers.add(supplier)
+                # cập nhật mua hàng chi tiết
+                PurchaseDetail.objects.create(
+                    purchase = purchase,
+                    product = product_item,
+                    quantity = quantity,
+                    price = cost_price,
+                    total = quantity * cost_price,
+                    inventory = inventory,
+                )
+
+                # tạo stockImport
+                StockImport.objects.create(
+                    product = product_item,
+                    quantity = quantity,
+                    cost_price = cost_price,
+                    supplier = supplier,
+                )
+            if payment_method == 'cash':
+                InvoicePurchase.objects.create(
+                    purchase=purchase,
+                    invoice_date=purchase_date,
+                    method='cash',
+                    status='paid',
+                    total_amount=total_amount,
+                )
+                PaymentPurchase.objects.create(
+                    purchase=purchase,
+                    payment_method='cash',
+                    amount=total_amount,
+                    status='completed',
+                )
+            elif payment_method == 'bank_transfer':
+                InvoicePurchase.objects.create(
+                    purchase=purchase,
+                    invoice_date=purchase_date,
+                    method='bank_transfer',
+                    status='unpaid',
+                    total_amount=total_amount,
+                )
+                PaymentPurchase.objects.create(
+                    purchase=purchase,
+                    payment_method='bank_transfer',
+                    amount=total_amount,
+                    status='pending',
+                )
+            return purchase
 class PaymentPurchaseCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = PaymentPurchase

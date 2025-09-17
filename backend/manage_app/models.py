@@ -20,7 +20,7 @@ class User(AbstractUser):
 class Supplier(models.Model):
     SupplierID = models.AutoField(primary_key=True)
     user = models.OneToOneField(User, on_delete= models.CASCADE)
-    full_name = models.CharField(max_length=100)
+    full_name = models.CharField(max_length=100, unique=True)
     address = models.CharField(max_length=255, blank=True, null=True)
     phone = models.CharField(max_length=15, blank=True, null=True)
     company_name = models.CharField(max_length=100, blank=True, null=True)
@@ -34,7 +34,7 @@ class Supplier(models.Model):
 class Customer(models.Model):
     CustomerID = models.AutoField(primary_key=True)
     user = models.OneToOneField(User, on_delete= models.CASCADE)
-    full_name = models.CharField(max_length=100)
+    full_name = models.CharField(max_length=100, unique=True)
     address = models.CharField(max_length=255, blank=True, null=True)
     phone = models.CharField(max_length=15, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -84,50 +84,7 @@ class ProductProposals(models.Model):
 
     def __str__(self):
         return f"Proposal {self.id} for {self.product} by {self.supplier}"
-# bảng mua
-class Purchase(models.Model):
-    purchaseID = models.AutoField(primary_key=True)
-    supplier = models.ForeignKey(Supplier, on_delete=models.CASCADE)
-    purchase_date = models.DateTimeField(auto_now_add=True)
-    total_amount = models.DecimalField(max_digits=12, decimal_places=2)
-
-
-    def __str__(self):
-        return f"Purchase {self.purchaseID} - {self.supplier.full_name}"
-class PurchaseDetail(models.Model):
-    purchaseDetailID = models.AutoField(primary_key=True)
-    purchase = models.ForeignKey(Purchase, on_delete=models.CASCADE)
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    quantity = models.IntegerField()
-    price = models.DecimalField(max_digits=12, decimal_places=2)
-    total = models.DecimalField(max_digits=12, decimal_places=2)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    def __str__(self):
-        return f"PurchaseDetail {self.purchaseDetailID} - {self.purchase.purchaseID} - {self.product.name}"
-# bảng order
-class Order(models.Model):
-    orderID = models.AutoField(primary_key=True)
-    customer = models.ForeignKey(Customer,on_delete=models.CASCADE)
-    order_date = models.DateTimeField(auto_now_add=True)
-    total_amount = models.DecimalField(max_digits=12, decimal_places=2)
-    def __str__(self):
-        return f"Order {self.orderID} - {self.customer.full_name}"
-# bảng order detail
-class OrderDetail(models.Model):
-    orderDetailID = models.AutoField(primary_key=True)
-    order = models.ForeignKey(Order, on_delete=models.CASCADE)
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    quantity = models.IntegerField()
-    price = models.DecimalField(max_digits=12, decimal_places=2)
-    total = models.DecimalField(max_digits=12, decimal_places=2)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    def __str__(self):
-        return f"OrderDetail {self.orderDetailID} - {self.order.customer.full_name} - {self.product.name}"
-# bảng Inventory 
+    # bảng Inventory 
 class Inventory(models.Model):
     id = models.AutoField(primary_key=True)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
@@ -142,6 +99,52 @@ class Inventory(models.Model):
 
     def __str__(self):
         return f"Inventory {self.id} - {self.product.name} - {self.quantity}"
+
+# bảng mua
+class Purchase(models.Model):
+    purchaseID = models.AutoField(primary_key=True)
+    supplier = models.ForeignKey(Supplier, on_delete=models.CASCADE)
+    purchase_date = models.DateTimeField(auto_now_add=True)
+    total_amount = models.DecimalField(max_digits=30, decimal_places=2)
+
+
+    def __str__(self):
+        return f"Purchase {self.purchaseID} - {self.supplier.full_name}"
+class PurchaseDetail(models.Model):
+    purchaseDetailID = models.AutoField(primary_key=True)
+    purchase = models.ForeignKey(Purchase, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    inventory = models.ForeignKey(Inventory, on_delete=models.SET_NULL, null=True, blank=True)  # Thêm dòng này
+    quantity = models.IntegerField()
+    price = models.DecimalField(max_digits=12, decimal_places=2)
+    total = models.DecimalField(max_digits=30, decimal_places=2)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"PurchaseDetail {self.purchaseDetailID} - {self.purchase.purchaseID} - {self.product.name}"
+# bảng order
+class Order(models.Model):
+    orderID = models.AutoField(primary_key=True)
+    customer = models.ForeignKey(Customer,on_delete=models.CASCADE)
+    order_date = models.DateTimeField(auto_now_add=True)
+    total_amount = models.DecimalField(max_digits=30, decimal_places=2)
+    def __str__(self):
+        return f"Order {self.orderID} - {self.customer.full_name}"
+# bảng order detail
+class OrderDetail(models.Model):
+    orderDetailID = models.AutoField(primary_key=True)
+    order = models.ForeignKey(Order, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    inventory = models.ForeignKey(Inventory, on_delete=models.SET_NULL, null=True, blank=True)  # Thêm dòng này
+    quantity = models.IntegerField()
+    price = models.DecimalField(max_digits=12, decimal_places=2)
+    total = models.DecimalField(max_digits=30, decimal_places=2)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"OrderDetail {self.orderDetailID} - {self.order.customer.full_name} - {self.product.name}"
 
 # stock
 class StockImport(models.Model):
@@ -173,7 +176,7 @@ class InvoiceOrder(models.Model):
     id = models.AutoField(primary_key=True)
     order = models.ForeignKey(Order, on_delete=models.CASCADE)
     invoice_date = models.DateTimeField(auto_now_add=True)
-    total_amount = models.DecimalField(max_digits=12, decimal_places=2)
+    total_amount = models.DecimalField(max_digits=30, decimal_places=2)
     invoice_number = models.CharField(max_length=100, blank=True, null=True)
     method = models.CharField(max_length=50,choices=(
         ("vnpay", "VNPAY"),
@@ -185,6 +188,7 @@ class InvoiceOrder(models.Model):
         ("partially_paid", "Partially Paid"),
         ("canceled", "Canceled"),
     ), default="unpaid")
+    address = models.CharField(max_length=255, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -199,7 +203,7 @@ class InvoicePurchase(models.Model):
     id = models.AutoField(primary_key=True)
     purchase = models.ForeignKey(Purchase, on_delete=models.CASCADE)
     invoice_date = models.DateTimeField(auto_now_add=True)
-    total_amount = models.DecimalField(max_digits=12, decimal_places=2)
+    total_amount = models.DecimalField(max_digits=30, decimal_places=2)
     invoice_number = models.CharField(max_length=100, blank=True, null=True, unique=True)
     method = models.CharField(max_length=50,choices=(
         ("vnpay", "VNPAY"),
@@ -278,6 +282,7 @@ class CartItem(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.IntegerField()
     price = models.DecimalField(max_digits=12, decimal_places=2)
+    location = models.ForeignKey(Inventory, on_delete=models.SET_NULL, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     def __str__(self):

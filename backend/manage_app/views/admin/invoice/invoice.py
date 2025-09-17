@@ -112,10 +112,6 @@ class InvoicePurchaseViewSet(viewsets.ViewSet):
         
 class InvoiceOrderViewSet(viewsets.ViewSet):
     permission_classes = [IsAdminRole]
-    def list(self,request):
-        invoices = InvoiceOrder.objects.all().order_by('-invoice_date').prefetch_related('order__orderdetail_set__product')
-        serializer = InvoiceOrderSerializer(invoices, many=True)
-        return Response(serializer.data)
     @staticmethod
     def format_number(value):
         try:
@@ -123,7 +119,19 @@ class InvoiceOrderViewSet(viewsets.ViewSet):
             return f"{number:,.0f} ₫"  # làm tròn về số nguyên (không in .00)
         except Exception:
             return str(value)
+    def list(self,request):
+        invoices = InvoiceOrder.objects.all().order_by('-invoice_date').prefetch_related('order__orderdetail_set__product')
+        serializer = InvoiceOrderSerializer(invoices, many=True)
+        return Response(serializer.data)
     def retrieve(self, request, pk=None):
+        try:
+            invoice = InvoiceOrder.objects.get(pk=pk)
+            serializer = ReportInvoiceOrderSerializer(invoice)
+            return Response(serializer.data)
+        except InvoicePurchase.DoesNotExist:
+            return Response({"detail": "Invoice not found."}, status=status.HTTP_404_NOT_FOUND)
+    @action(detail=True, methods=['get'])
+    def export(self,request, pk=None):
         try:
             invoice = InvoiceOrder.objects.get(pk=pk)
             serializer = ReportInvoiceOrderSerializer(invoice)
@@ -141,8 +149,8 @@ class InvoiceOrderViewSet(viewsets.ViewSet):
             # Thông tin cơ bản
             doc.add_paragraph(f"Số hóa đơn: {data['invoice_number']}")
             doc.add_paragraph(f"Ngày bán: {data['order_date'].strftime('%d/%m/%Y') if data['order_date'] else 'N/A'}")
-            doc.add_paragraph(f"Phương thức: {data['method']}")
-            doc.add_paragraph(f"Trạng thái: {data['status']}")
+            doc.add_paragraph(f"Phương thức: {'Tiền mặt' if data['method'] == 'cash' else 'Chuyển khoản'}")
+            doc.add_paragraph(f"Trạng thái: {'Đã trả' if data['status'] == 'paid' else 'Chưa trả'}")
             doc.add_paragraph("")
 
             # Thông tin khách hàng
@@ -169,8 +177,8 @@ class InvoiceOrderViewSet(viewsets.ViewSet):
                 row_cells = table.add_row().cells
                 row_cells[0].text = str(item["product_name"])
                 row_cells[1].text = str(item["quantity"])
-                row_cells[2].text = self.format_currency(item['price'])
-                row_cells[3].text = self.format_currency(item['total'])
+                row_cells[2].text = self.format_number(item['price'])
+                row_cells[3].text = self.format_number(item['total'])
 
             # Tổng tiền
             doc.add_paragraph("")

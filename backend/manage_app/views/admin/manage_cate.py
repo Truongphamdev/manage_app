@@ -6,13 +6,16 @@ from django.shortcuts import get_object_or_404
 
 class CategoryViewSet(viewsets.ViewSet):
     permission_classes = [IsAdminRole]
-
+    def list(self, request):
+        categories = Category.objects.all()
+        data = [{"CategoryID": cat.CategoryID, "name": cat.name} for cat in categories]
+        return Response(data)
     def create(self, request):
         name = request.data.get('name')
         if not name:
             return Response({"error": "Tên danh mục là bắt buộc"}, status=status.HTTP_400_BAD_REQUEST)
         category = Category.objects.create(name=name)
-        return Response({"id": category.id, "name": category.name}, status=status.HTTP_201_CREATED)
+        return Response({"CategoryID": category.CategoryID, "name": category.name}, status=status.HTTP_201_CREATED)
 
     def update(self, request, pk=None):
         category = get_object_or_404(Category, pk=pk)
@@ -21,7 +24,7 @@ class CategoryViewSet(viewsets.ViewSet):
             return Response({"error": "Tên danh mục là bắt buộc"}, status=status.HTTP_400_BAD_REQUEST)
         category.name = name
         category.save()
-        return Response({"id": category.id, "name": category.name}, status=status.HTTP_200_OK)
+        return Response({"CategoryID": category.CategoryID, "name": category.name}, status=status.HTTP_200_OK)
 
     def destroy(self, request, pk=None):
         category = get_object_or_404(Category, pk=pk)
