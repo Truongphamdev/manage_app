@@ -1,151 +1,125 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import All_Api from '../../../api/AllApi';
 
 const CustomerOrderDetail = () => {
   const { id } = useParams();
+  const [order, setOrder] = useState(null);
 
-  const mockOrders = [
-    {
-      id: 1,
-      total: 10000000,
-      status: 'Pending',
-      date: '2025-09-01',
-      items: [
-        { product: 'Xi măng PC40', quantity: 10, price: 80000 },
-        { product: 'Gạch đỏ 4 lỗ', quantity: 100, price: 1200 },
-      ],
-    },
-    {
-      id: 2,
-      total: 20000000,
-      status: 'Confirmed',
-      date: '2025-09-02',
-      items: [
-        { product: 'Thép phi 16', quantity: 50, price: 15000 },
-      ],
-    },
-    {
-      id: 3,
-      total: 15000000,
-      status: 'Confirmed',
-      date: '2025-09-03',
-      items: [
-        { product: 'Gạch đỏ 4 lỗ', quantity: 200, price: 1200 },
-        { product: 'Thép phi 16', quantity: 30, price: 15000 },
-      ],
-    },
-    {
-      id: 4,
-      total: 25000000,
-      status: 'Delivered',
-      date: '2025-09-04',
-      items: [
-        { product: 'Xi măng PC40', quantity: 20, price: 80000 },
-      ],
-    },
-    {
-      id: 5,
-      total: 30000000,
-      status: 'Pending',
-      date: '2025-09-05',
-      items: [
-        { product: 'Cát xây dựng', quantity: 10, price: 200000 },
-        { product: 'Đá 1x2', quantity: 5, price: 300000 },
-      ],
-    },
-    {
-      id: 6,
-      total: 18000000,
-      status: 'Confirmed',
-      date: '2025-09-06',
-      items: [
-        { product: 'Sơn nước Dulux', quantity: 5, price: 500000 },
-      ],
-    },
-    {
-      id: 7,
-      total: 22000000,
-      status: 'Delivered',
-      date: '2025-09-07',
-      items: [
-        { product: 'Gạch lát nền 60x60', quantity: 100, price: 20000 },
-      ],
-    },
-    {
-      id: 8,
-      total: 17000000,
-      status: 'Pending',
-      date: '2025-09-08',
-      items: [
-        { product: 'Thép phi 12', quantity: 50, price: 12000 },
-        { product: 'Xi măng PC50', quantity: 10, price: 85000 },
-      ],
-    },
-    {
-      id: 9,
-      total: 19000000,
-      status: 'Confirmed',
-      date: '2025-09-09',
-      items: [
-        { product: 'Gạch đỏ 6 lỗ', quantity: 150, price: 1500 },
-      ],
-    },
-    {
-      id: 10,
-      total: 24000000,
-      status: 'Delivered',
-      date: '2025-09-10',
-      items: [
-        { product: 'Xi măng PC40', quantity: 15, price: 80000 },
-        { product: 'Sơn nước Dulux', quantity: 3, price: 500000 },
-      ],
-    },
-  ];
+  useEffect(() => {
+    const fetchOrder = async () => {
+      try {
+        const response = await All_Api.getOrderById(id);
+        setOrder(response);
+        console.log('Fetched customer order detail:', response);
+      } catch (error) {
+        console.error('Error fetching customer order detail:', error);
+      }
+    };
+    fetchOrder();
+  }, [id]);
 
-  const order = mockOrders.find((o) => o.id === parseInt(id)) || {};
+  if (!order) {
+    return (
+      <div className="text-center p-6 text-blue-700 font-medium">
+        Đang tải chi tiết đơn hàng...
+      </div>
+    );
+  }
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow">
-      <h2 className="text-xl font-semibold mb-4">Chi tiết đơn hàng</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <p><strong>ID:</strong> {order.id}</p>
-          <p><strong>Tổng tiền (VNĐ):</strong> {order.total?.toLocaleString('vi-VN')}</p>
+    <div className="bg-gradient-to-br from-blue-50 to-white p-4 sm:p-6 rounded-2xl shadow-lg">
+      {/* Tiêu đề */}
+      <h2 className="text-2xl font-bold mb-6 text-blue-800">
+        🧾 Chi tiết đơn hàng
+      </h2>
+
+      {/* Thông tin đơn */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-white p-4 rounded-xl shadow-sm border border-blue-100">
+        <div className="space-y-2 text-gray-700">
+          <p><span className="font-semibold text-blue-800">ID:</span> {order.orderID}</p>
+          <p>
+            <span className="font-semibold text-blue-800">Tổng tiền (VNĐ):</span>{' '}
+            {Number(order.total_amount)?.toLocaleString('vi-VN')}
+          </p>
         </div>
-        <div>
-          <p><strong>Trạng thái:</strong> {order.status}</p>
-          <p><strong>Ngày đặt:</strong> {order.date}</p>
+        <div className="space-y-2 text-gray-700">
+          <p>
+            <span className="font-semibold text-blue-800">Trạng thái:</span>{' '}
+            <span
+              className={`font-medium ${
+                order.status === 'paid'
+                  ? 'text-green-600'
+                  : order.status === 'unpaid'
+                  ? 'text-yellow-600'
+                  : 'text-red-600'
+              }`}
+            >
+              {order.status === 'paid'
+                ? 'Đã thanh toán'
+                : order.status === 'unpaid'
+                ? 'Chưa thanh toán'
+                : 'Hủy'}
+            </span>
+          </p>
+          <p>
+            <span className="font-semibold text-blue-800">Ngày đặt:</span>{' '}
+            {new Date(order.order_date).toLocaleDateString('vi-VN')}
+          </p>
         </div>
       </div>
-      <h3 className="text-lg font-semibold mt-4 mb-2">Sản phẩm trong đơn hàng</h3>
-      <div className="overflow-x-auto">
-        <table className="min-w-full bg-white border">
-          <thead>
+
+      {/* Bảng sản phẩm */}
+      <h3 className="text-xl font-semibold mt-8 mb-4 text-blue-800">
+        🛍 Sản phẩm trong đơn hàng
+      </h3>
+      <div className="overflow-x-auto rounded-xl shadow border border-blue-100 bg-white">
+        <table className="min-w-full text-sm border-collapse">
+          <thead className="bg-blue-100 text-blue-900">
             <tr>
-              <th className="py-2 px-4 border">Sản phẩm</th>
-              <th className="py-2 px-4 border">Số lượng</th>
-              <th className="py-2 px-4 border">Giá (VNĐ)</th>
-              <th className="py-2 px-4 border">Tổng giá (VNĐ)</th>
+              <th className="py-3 px-4 text-left">Sản phẩm</th>
+              <th className="py-3 px-4 text-left">Số lượng</th>
+              <th className="py-3 px-4 text-left">Giá (VNĐ)</th>
+              <th className="py-3 px-4 text-left">Tổng giá (VNĐ)</th>
             </tr>
           </thead>
           <tbody>
-            {order.items?.map((item, index) => (
-              <tr key={index}>
-                <td className="py-2 px-4 border">{item.product}</td>
-                <td className="py-2 px-4 border">{item.quantity?.toLocaleString('vi-VN')}</td>
-                <td className="py-2 px-4 border">{item.price?.toLocaleString('vi-VN')}</td>
-                <td className="py-2 px-4 border">{(item.quantity * item.price)?.toLocaleString('vi-VN')}</td>
+            {order.order_details?.map((item, idx) => (
+              <tr
+                key={idx}
+                className={
+                  idx % 2 === 0
+                    ? 'bg-white hover:bg-blue-50 transition'
+                    : 'bg-blue-50 hover:bg-blue-100 transition'
+                }
+              >
+                <td className="py-2 px-4 text-gray-700">{item.product_name}</td>
+                <td className="py-2 px-4 text-gray-700">
+                  {Number(item.quantity)?.toLocaleString('vi-VN')}
+                </td>
+                <td className="py-2 px-4 text-gray-700">
+                  {Number(item.price)?.toLocaleString('vi-VN')}
+                </td>
+                <td className="py-2 px-4 text-gray-700">
+                  {(Number(item.quantity) * Number(item.price))?.toLocaleString(
+                    'vi-VN'
+                  )}
+                </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
-      <Link
-        to="/customer/orders"
-        className="mt-4 inline-block bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
-      >
-        Quay lại
-      </Link>
+
+      {/* Nút quay lại */}
+      <div className="mt-6">
+        <Link
+          to="/customer/orders"
+          className="inline-block bg-blue-600 text-white px-5 py-2 rounded-md shadow hover:bg-blue-700 transition"
+        >
+          ⬅ Quay lại danh sách
+        </Link>
+      </div>
     </div>
   );
 };

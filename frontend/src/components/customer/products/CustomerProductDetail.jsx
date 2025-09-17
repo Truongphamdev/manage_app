@@ -11,17 +11,20 @@ const CustomerProductDetail = () => {
   const [addModalOpen, setAddModalOpen] = useState(false);
   const [message, setMessage] = useState("");
   const [errors, setErrors] = useState("");
+  const [location, setLocation] = useState("");
   useEffect(() => {
     const fetchProduct = async () => {
       try {
         const response = await All_Api.getCustomerProductById(id);
         setProduct(response);
+        console.log("Product detail:", response);
       } catch (err) {
         setError(err.response?.data || "Không tìm thấy sản phẩm");
       }
     };
     fetchProduct();
   }, [id]);
+  console.log("product detail", product);
 // add to cart
   const handleAddToCart = async () => {
     if (quantity < 1) {
@@ -32,8 +35,16 @@ const CustomerProductDetail = () => {
       setMessage("Số lượng vượt quá tồn kho");
       return;
     }
+    if (!location) {
+      setMessage("Vui lòng chọn vị trí");
+      return;
+    }
+    if (quantity> product.location_info.find(loc => loc.location === location)?.quantity) {
+      setMessage("Số lượng vượt quá tồn kho tại vị trí đã chọn");
+      return;
+    }
     try {
-      const data = { product_id, quantity };
+      const data = { product_id, quantity ,location: parseInt(location)};
       await All_Api.addToCart(data);
       alert("Thêm vào giỏ hàng thành công");
       setAddModalOpen(false);
@@ -80,6 +91,20 @@ const CustomerProductDetail = () => {
                 placeholder="Nhập số lượng"
                 required
               />
+
+              <select
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                required
+              >
+                <option value="">Chọn vị trí</option>
+                {product.location_info.map((loc) => (
+                  <option key={loc.id} value={loc.id}>
+                    {loc.location} - {loc.quantity}
+                  </option>
+                ))}
+              </select>
               <div className="flex justify-end gap-3">
                 <button
                   type="button"

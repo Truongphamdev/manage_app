@@ -1,7 +1,9 @@
 from rest_framework import viewsets,status
 from rest_framework.response import Response
-from ...models import Inventory,Product,User,Customer,Supplier
-from ...serializers import ProductSerializer,InventorySerializer,CustomerSerializer,SupplierSerializer,UserSerializer
+
+from .pagination import StandardResultsSetPagination
+from ...models import Inventory,Product,User,Customer,Supplier,Order
+from ...serializers import ProductSerializer,InventorySerializer,CustomerSerializer,SupplierSerializer,UserSerializer,AllOrderSerializer
 
 import unicodedata
 
@@ -67,3 +69,15 @@ class SearchbyUsernameViewSet(viewsets.ViewSet):
             "customers": customer_data.data,
             "suppliers": supplier_data.data
         }, status=status.HTTP_200_OK)
+class SearchbyUsernameOrderViewSet(viewsets.GenericViewSet):  # đổi sang GenericViewSet để dùng phân trang
+    pagination_class = StandardResultsSetPagination
+
+    def list(self, request):
+        search = request.query_params.get('search', '')
+        orders = Order.objects.filter(customer__full_name__icontains=search).order_by('-order_date')
+        page = self.paginate_queryset(orders)
+        if page is not None:
+            serializer = AllOrderSerializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+        serializer = AllOrderSerializer(orders, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)

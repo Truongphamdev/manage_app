@@ -35,21 +35,21 @@ const PurchaseForm = () => {
     const handleAddRow = () => {
     setProductRows([...productRows, { product: "", quantity: "", cost_price: "" }]);
     }
+    const productsData = productRows.map(row => ({
+      product: Number(row.product),
+      quantity: Number(row.quantity),
+      cost_price: Number(row.cost_price)
+    }));
+    const total_amount = productsData.reduce((sum, item) => sum + item.quantity * item.cost_price, 0);
+    const data = {
+      ...formData,
+      supplier: Number(formData.supplier), 
+      products: productsData,
+      total_amount
+    };
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const productsData = productRows.map(row => ({
-        product: Number(row.product),
-        quantity: Number(row.quantity),
-        cost_price: Number(row.cost_price)
-      }));
-      const total_amount = productsData.reduce((sum, item) => sum + item.quantity * item.cost_price, 0);
-      const data = {
-        ...formData,
-        supplier: Number(formData.supplier), 
-        products: productsData,
-        total_amount
-      };
       const response = await All_Api.createPurchase(data);
       if (formData.payment_method === "cash") {
           alert("Tạo phiếu nhập thành công!");
@@ -78,7 +78,7 @@ const PurchaseForm = () => {
     >
       <option value="">Chọn nhà cung cấp</option>
       {suppliers.map(sup => (
-        <option key={sup.id} value={sup.SupplierID}>{sup.full_name}</option>
+        <option key={sup.id} value={sup.SupplierID}>{sup.full_name +" - "+sup.company_name}</option>
       ))}
     </select>
   </div>
@@ -170,12 +170,23 @@ const PurchaseForm = () => {
 
   {/* Nút submit */}
   <div className="flex justify-end">
+  {formData.payment_method === "bank_transfer" ?(
     <button
+      type="button"
+      onClick={()=>navigate('/admin/purchases/payment/qrcode', {state:{amount: data.total_amount,data: data}})}
+      className="bg-green-600 text-white px-5 py-2 rounded-lg shadow hover:bg-green-700 transition"
+    >
+      Thanh toán Qrcode
+    </button>
+  ):(
+     <button
       type="submit"
       className="bg-blue-600 text-white px-5 py-2 rounded-lg shadow hover:bg-blue-700 transition"
     >
       Tạo phiếu nhập
     </button>
+  )}
+   
     <button type="button" onClick={() => navigate(-1)} className="ml-3 bg-gray-300 text-gray-700 px-5 py-2 rounded-lg shadow hover:bg-gray-400 transition">
       Hủy
     </button>

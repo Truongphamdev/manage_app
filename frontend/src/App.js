@@ -43,6 +43,14 @@ import { InvoiceOrder } from './components/reports/invoice/InvoiceOrder';
 import { InvoicePurchaseDetail } from './components/reports/invoice/InvoicePurchaseDetail';
 import { InvoiceOrderDetail } from './components/reports/invoice/InvoiceOrderDetail';
 import { Password } from './components/password/Password';
+import CheckoutPage from './components/customer/checkout/CheckoutPage';
+import { Qrcode } from './components/customer/checkout/Qrcode';
+import { ConfirmTransaction } from './components/customer/checkout/ConfirmTransaction';
+import { AdminQrcode } from './components/products/checkout/AdminQrcode';
+import { Transaction } from './components/products/checkout/Transaction';
+import OrderConfirm from './components/orders/OrderConfirm';
+import OrderConfirmDetail from './components/orders/OrderConfirmDetail';
+import Category from './components/category/Category';
 // import SupplierProfile from './components/supplier/profile/SupplierProfile';
 
 function App() {
@@ -75,6 +83,11 @@ function App() {
               <Route path='/admin/invoices/purchase/:id' element={<InvoicePurchaseDetail/>}/>
               <Route path='/admin/invoices/order/:id' element={<InvoiceOrderDetail/>}/>
               <Route path='/admin/invoices/order' element={<InvoiceOrder/>}/>
+              <Route path='/admin/purchases/payment/qrcode' element={<AdminQrcode/>} />
+              <Route path='/admin/purchases/confirm-transaction' element={<Transaction/>} />
+              <Route path='/admin/orders/confirm' element={<OrderConfirm />} />
+              <Route path='/admin/orders/confirm/:id' element={<OrderConfirmDetail />} />
+              <Route path='/admin/categories/' element={<Category />} />
             </Route>
           </Route>
 
@@ -102,11 +115,15 @@ function App() {
               <Route path="/customer/products/:id" element={<CustomerProductDetail />} />
               <Route path="/customer/cart" element={<CustomerCart />} />
               <Route path="/customer/orders" element={<CustomerOrderList />} />
+              <Route path='customer/orders/checkout' element={<CheckoutPage />} />
               <Route path="/customer/orders/:id" element={<CustomerOrderDetail />} />
               <Route path="/customer/payments" element={<CustomerPaymentList />} />
               <Route path="/customer/profile" element={<CustomerProfile />} />
               <Route path="/customer/profile/edit" element={<CustomerProfileEdit />} />
               <Route path='/customer/profile/changepassword' element={<Password />} />
+              {/* payment */}
+              <Route path='/customer/orders/payment/qrcode' element={<Qrcode/>} />
+              <Route path='/customer/orders/confirm-transaction' element={<ConfirmTransaction/>} />
             </Route>
           </Route>
         </Routes>

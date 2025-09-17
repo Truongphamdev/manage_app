@@ -9,6 +9,7 @@ const CustomerProductList = () => {
   const [quantity, setQuantity] = useState(1);
   const [addModalOpen, setAddModalOpen] = useState(false);
   const [message, setMessage] = useState("");
+  const [location, setLocation] = useState("");
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -32,8 +33,16 @@ const CustomerProductList = () => {
       setMessage("Số lượng vượt quá tồn kho");
       return;
     }
+    if (!location) {
+      setMessage("Vui lòng chọn vị trí");
+      return;
+    }
+    if (quantity> products.find((p) => p.ProductID === product_id).location_info.find(loc => loc.location === location)?.quantity) {
+      setMessage("Số lượng vượt quá tồn kho tại vị trí đã chọn");
+      return;
+    }
     try {
-      const data = { product_id, quantity };
+      const data = { product_id, quantity, location: parseInt(location) };
       await All_Api.addToCart(data);
       alert("Thêm vào giỏ hàng thành công");
       setAddModalOpen(false);
@@ -92,6 +101,19 @@ const CustomerProductList = () => {
                 placeholder="Nhập số lượng"
                 required
               />
+              <select
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                required
+              >
+                <option value="">Chọn vị trí</option>
+                {products.find((p) => p.ProductID === product_id)?.location_info.map((loc) => (
+                  <option key={loc.id} value={loc.id}>
+                    {loc.location} (Tồn: {loc.quantity})
+                  </option>
+                ))}
+              </select>
               <div className="flex justify-end gap-3">
                 <button
                   type="button"

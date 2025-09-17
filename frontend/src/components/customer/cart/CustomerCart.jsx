@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Minus, Plus } from "lucide-react"; 
 import All_Api from "../../../api/AllApi";
 
@@ -8,11 +8,11 @@ const CustomerCart = () => {
   const [errors, setErrors] = useState("");
   const [loading, setLoading] = useState(true);
   const [total, setTotal] = useState(0);
-
+  const [selectedItems, setSelectedItems] = useState([]);
+  const navigate = useNavigate();
   useEffect(() => {
     fetchCartItems();
   }, []);
-
   const fetchCartItems = async () => {
     try {
       const response = await All_Api.getCart();
@@ -32,7 +32,17 @@ const CustomerCart = () => {
       console.log(error.response?.data || "Lỗi khi cập nhật giỏ hàng");
     }
   };
-
+// xử lý chọn san phẩm
+const handleSelectItem = (itemId) => {
+    setSelectedItems((prevSelected) =>{
+      if (prevSelected.includes(itemId)) {
+        return prevSelected.filter(id => id !== itemId);
+      }
+      return [...prevSelected, itemId];
+    });
+  };
+  console.log('selectedItems', selectedItems);
+  // xóa sản phẩm
   const handleDeleteItem = async (itemId) => {
     if (!window.confirm("Bạn có chắc chắn muốn xóa sản phẩm này khỏi giỏ hàng?")) return;
     try {
@@ -52,7 +62,14 @@ const CustomerCart = () => {
     );
     setTotal(totalAmount);
   }, [cartItems]);
-
+// navigate state
+  const goToPayment = () => {
+    if (selectedItems.length === 0) {
+      alert("Vui lòng chọn ít nhất một sản phẩm để thanh toán.");
+      return;
+    }
+    navigate("/customer/orders/checkout", { state: { selectedItems } });
+  };
   if (loading) {
     return <div className="p-6 text-center">Đang tải...</div>;
   }
@@ -67,10 +84,11 @@ const CustomerCart = () => {
         <>
           {/* Desktop Table */}
           <div className="hidden sm:block overflow-x-auto">
-            <table className="min-w-full bg-white border rounded-lg">
+            <table className={`min-w-full  border rounded-lg bg-white`}>
               <thead className="bg-gray-100 text-gray-700">
                 <tr>
                   <th className="py-3 px-4 border text-center">ID</th>
+                  <th className="py-3 px-4 border text-center">Chọn</th>
                   <th className="py-3 px-4 border text-center">Sản phẩm</th>
                   <th className="py-3 px-4 border text-center">Ảnh</th>
                   <th className="py-3 px-4 border text-center">Số lượng</th>
@@ -83,6 +101,9 @@ const CustomerCart = () => {
                 {cartItems.items.map((item) => (
                   <tr key={item.id} className="hover:bg-gray-50 transition">
                     <td className="py-3 px-4 border text-center">{item.id}</td>
+                    <td className="py-3 px-4 border text-center">
+                      <input type="checkbox" checked={selectedItems.includes(item.id)} onChange={() => handleSelectItem(item.id)} />
+                    </td>
                     <td className="py-3 px-4 border text-center font-medium text-gray-800">
                       {item.product_name}
                     </td>
@@ -132,6 +153,7 @@ const CustomerCart = () => {
                         minimumFractionDigits: 0,
                       })}
                     </td>
+                    
                     <td className="py-3 px-4 border text-center">
                       <button
                         onClick={() => handleDeleteItem(item.id)}
@@ -150,6 +172,9 @@ const CustomerCart = () => {
           <div className="sm:hidden space-y-4">
             {cartItems.items.map((item) => (
               <div key={item.id} className="border rounded-lg p-4 shadow-sm flex flex-col gap-3">
+                <div>
+                  <input type="checkbox" checked={selectedItems.includes(item.id)} onChange={() => handleSelectItem(item.id)} />
+                </div>
                 <div className="flex items-center gap-4">
                   <img
                     src={item.product_image}
@@ -225,7 +250,10 @@ const CustomerCart = () => {
               </span>
             </p>
             <Link
-              to="/customer/payments"
+              onClick={(e) => {
+                e.preventDefault();
+                goToPayment();
+              }}
               className="bg-blue-500 text-white px-6 py-2 rounded-lg shadow hover:bg-blue-600 transition"
             >
               Thanh toán

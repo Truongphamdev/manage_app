@@ -8,11 +8,19 @@ from .admin.purchase_serializer import PaymentPurchaseCreateSerializer,ProductSe
 PurchaseDetailSerializer,InventorySerializer,CreatePurchaseSerializer
 from .admin.inventory_serializer import InventorySerializer,InventoryDetailSerializer
 from .admin.invoice.invoice_serializer import InvoicePurchaseSerializer,InvoiceOrderSerializer
+from .admin.manage_order.all_order_serializer import AllOrderSerializer
+from .admin.manage_order.confim_serializer import ConfirmOrderSerializer
+from .admin.dashboard.dashboard_serializer import DashboardSerializer
 # supplier
 from .supplier.prosal_product import ProposalProductSerializer,ProposalProductAdminSerializer
 from .supplier.main import OrderDetailSerializer,HistoryStockSerializer
 from .supplier.manage_product_serializer import ProductSupplierSerializer
 from .supplier.manage_purchase_serializer import PurchaseSerializer,PurchaseDetailSerializer
+from .supplier.dashboard.dashboard_serializer import SupplierDashboardSerializer
 # customer
 from .customer.cart_serializer import CartItemSerializer,CartSerializer
 from .customer.product.product_serializer import ProductCustomerSerializer
+from .customer.order_serializer import CreateOrderSerializer,CartItemDisplaySerializer,OrderSerializer
+from .customer.payment.payment import PaymentOrderCreateSerializer
+from .customer.payment.history_serializer import PaymentOrderSerializer
+from .customer.order.all_order_serializer import AllOrderCustomerSerializer
