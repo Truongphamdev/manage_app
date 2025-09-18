@@ -6,7 +6,7 @@ from .views import (
     ProductSupplierViewSet, ManagePurchaseViewSet, InventoryViewSet,SearchbyLocationViewSet,CombinedSearchViewSet,ReportViewSet,ReportRevenueViewSet,
     SearchbyProductNameViewSet,InvoicePurchaseViewSet,InvoiceOrderViewSet,CustomerProductViewSet,SearchbyUsernameViewSet,
     OrderCreateViewSet,PaymentOrderCreateView,AllOrderViewSet,SearchbyUsernameOrderViewSet,
-    ConfirmOrderViewSet,DashboardViewSet,SupplierDashboardViewSet,AllOrderView,PaymentHistoryView
+    ConfirmOrderViewSet,DashboardViewSet,SupplierDashboardViewSet,AllOrderView,PaymentHistoryView,ConfirmPurchaseViewSet
 )
 from rest_framework_simplejwt.views import TokenRefreshView
 
@@ -72,6 +72,11 @@ urlpatterns = [
     path('supplier/products/<int:pk>/', ProductSupplierViewSet.as_view({'get': 'retrieve'}), name='retrieve-product'),
     path('supplier/purchases/', ManagePurchaseViewSet.as_view({'get': 'list'}), name='list-purchases'),
     path('supplier/purchases/<int:pk>/', ManagePurchaseViewSet.as_view({'get': 'retrive'}), name='retrieve-purchase'),
+    # manage purchase
+    path('supplier/purchases/confirm',ConfirmPurchaseViewSet.as_view({'get': 'list'}), name='list-purchases'),
+    path('supplier/purchases/confirm/<int:pk>/', ConfirmPurchaseViewSet.as_view({'get': 'retrieve'}), name='retrieve-purchase'),
+    path('supplier/purchases/confirm/<int:pk>/approve/', ConfirmPurchaseViewSet.as_view({'post': 'approve'}), name='approve-purchase'),
+    path('supplier/purchases/confirm/<int:pk>/reject/', ConfirmPurchaseViewSet.as_view({'post': 'reject'}), name='reject-purchase'),
     # Supplier order/history
     path('supplier/orders/', OrderDetailViewSet.as_view({'get': 'list'}), name='list-orders'),
     path('supplier/orders/<int:pk>/', OrderDetailViewSet.as_view({'get': 'retrieve'}), name='retrieve-order'),

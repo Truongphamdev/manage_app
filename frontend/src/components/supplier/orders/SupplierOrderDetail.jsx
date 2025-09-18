@@ -86,9 +86,9 @@ return (
               <td className="py-3 px-4 border-b text-center">
                 <span
                   className={`px-3 py-1 rounded-full text-sm font-medium ${
-                    item.status === "Completed"
+                    item.status === "paid"
                       ? "bg-green-100 text-green-700"
-                      : item.status === "Pending"
+                      : item.status === "unpaid"
                       ? "bg-yellow-100 text-yellow-700"
                       : "bg-red-100 text-red-700"
                   }`}

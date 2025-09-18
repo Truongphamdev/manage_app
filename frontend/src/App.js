@@ -51,6 +51,8 @@ import { Transaction } from './components/products/checkout/Transaction';
 import OrderConfirm from './components/orders/OrderConfirm';
 import OrderConfirmDetail from './components/orders/OrderConfirmDetail';
 import Category from './components/category/Category';
+import AllPurchase from './components/supplier/purchase/AllPurchase';
+import PurchaseConfirmDetail from './components/supplier/purchase/PurchaseConfirmDetail';
 // import SupplierProfile from './components/supplier/profile/SupplierProfile';
 
 function App() {
@@ -104,6 +106,8 @@ function App() {
               <Route path="/supplier/profile" element={<SupplierProfile />} />
               <Route path="/supplier/profile/edit" element={<SupplierProfileEdit />} />
               <Route path='/supplier/profile/changepassword' element={<Password />} />
+              <Route path='/supplier/purchases/confirm' element={<AllPurchase/>} />
+              <Route path='/supplier/purchase/confirm/:id' element={<PurchaseConfirmDetail/>} />
             </Route>
           </Route>
 

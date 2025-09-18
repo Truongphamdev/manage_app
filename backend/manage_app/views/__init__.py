@@ -18,6 +18,7 @@ from .supplier.main import OrderDetailViewSet,HistoryStockViewSet
 from .supplier.mana_product import ProductSupplierViewSet
 from .supplier.manage_purchase import ManagePurchaseViewSet
 from .supplier.dashboard.dashboard import SupplierDashboardViewSet
+from .supplier.confirm import ConfirmPurchaseViewSet
 # admin order
 from .admin.manage_order.order import AllOrderViewSet
 from .admin.manage_order.confirm import ConfirmOrderViewSet

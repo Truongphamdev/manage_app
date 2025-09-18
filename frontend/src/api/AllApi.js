@@ -72,6 +72,10 @@ const All_Api = {
     // manage purchase
     getPurchases: () => axiosClient.get('/supplier/purchases/'),
     getPurchaseDetailById: (id) => axiosClient.get(`/supplier/purchases/${id}/`),
+    getPurchaseConfirm:()=>axiosClient.get('/supplier/purchases/confirm'),
+    getPurchaseConfirmById:(id)=>axiosClient.get(`/supplier/purchases/confirm/${id}/`),
+    approvePurchase:(id)=>axiosClient.post(`/supplier/purchases/confirm/${id}/approve/`),
+    rejectPurchase:(id)=>axiosClient.post(`/supplier/purchases/confirm/${id}/reject/`),
     // customer
     // customer product
     getCustomerProducts: () => axiosClient.get('/customer/products/'),
