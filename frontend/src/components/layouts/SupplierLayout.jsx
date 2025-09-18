@@ -16,6 +16,7 @@ const SupplierLayout = () => {
     { name: 'Quản lý sản phẩm', path: '/supplier/products' },
     { name: 'Đơn hàng', path: '/supplier/purchases' },
     { name: 'Thông tin cá nhân', path: '/supplier/profile' },
+    { name: 'Xác nhận đơn hàng', path: '/supplier/purchases/confirm' }
   ];
 
   return (
