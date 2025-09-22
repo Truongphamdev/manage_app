@@ -10,6 +10,7 @@ from .admin.prosal_product import ProposalProductAdminViewSet
 from .admin.manage_cate import CategoryViewSet
 from .admin.purchase.purchase import PaymentPurchaseCreateView,PurchaseCreateView
 from .admin.inventory import InventoryViewSet
+from .admin.statistical import StatisticalViewSet
 # admin invoice
 from .admin.invoice.invoice import InvoicePurchaseViewSet,InvoiceOrderViewSet
 # supplier
