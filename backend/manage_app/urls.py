@@ -6,7 +6,7 @@ from .views import (
     ProductSupplierViewSet, ManagePurchaseViewSet, InventoryViewSet,SearchbyLocationViewSet,CombinedSearchViewSet,ReportViewSet,ReportRevenueViewSet,
     SearchbyProductNameViewSet,InvoicePurchaseViewSet,InvoiceOrderViewSet,CustomerProductViewSet,SearchbyUsernameViewSet,
     OrderCreateViewSet,PaymentOrderCreateView,AllOrderViewSet,SearchbyUsernameOrderViewSet,
-    ConfirmOrderViewSet,DashboardViewSet,SupplierDashboardViewSet,AllOrderView,PaymentHistoryView,ConfirmPurchaseViewSet
+    ConfirmOrderViewSet,DashboardViewSet,SupplierDashboardViewSet,AllOrderView,PaymentHistoryView,ConfirmPurchaseViewSet,StatisticalViewSet
 )
 from rest_framework_simplejwt.views import TokenRefreshView
 
@@ -61,6 +61,9 @@ urlpatterns = [
     # Admin category
     path('admin/categories/', CategoryViewSet.as_view({'get': 'list', 'post': 'create'}), name='list-categories'),
     path('admin/categories/<int:pk>/', CategoryViewSet.as_view({'put': 'update', 'delete': 'destroy'}), name='update-delete-category'),
+    # Statistical
+    path('admin/statistical/sales/', StatisticalViewSet.as_view({'get': 'get_statistical_sales_date'}), name='statistical-sales'),
+    path('admin/statistical/purchases/', StatisticalViewSet.as_view({'get': 'get_statistical_purchase_data'}), name='statistical-purchases'),
     # purchase
     path('admin/purchase/', PurchaseCreateView.as_view({'post': 'create'}), name='create'),
     path('admin/purchase/payment/', PaymentPurchaseCreateView.as_view({'post': 'create'}), name='payment-create'),

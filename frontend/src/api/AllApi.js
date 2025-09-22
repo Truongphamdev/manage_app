@@ -58,6 +58,12 @@ const All_Api = {
     listPayments: (id) => axiosClient.get(`/admin/purchase/${id}/payments/`),
     generateQRCode: (id) => axiosClient.get(`/admin/purchase/payment/qrcode/${id}/`),
     createPayment: (data) => axiosClient.post('/admin/purchase/payment/', data),
+    // statistacal
+    getStatisticalSalesDate: (params) => axiosClient.get('/admin/statistical/sales/', { params }),
+    getStatisticalPurchaseData: (params) => axiosClient.get('/admin/statistical/purchases/', { params }),
+    // dashboard
+    getYearlyStats: () => axiosClient.get('/admin/dashboard/yearly-stats/'),
+    getMonthlyStats: (year) => axiosClient.get(`/admin/dashboard/monthly-stats/${year}/`),
     // profile
     getUserProfile: () => axiosClient.get('/auth/user/customer/'),
     updateUserProfile: (data) => axiosClient.put('/auth/user/update/customer/', data),

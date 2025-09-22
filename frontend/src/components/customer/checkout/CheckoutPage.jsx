@@ -79,7 +79,7 @@ useEffect(() => {
       <h1 className="text-2xl font-bold text-center sm:text-left">
         Xác nhận đơn hàng
       </h1>
-{console.log("paymentMethod:", paymentMethod)}
+
 
       {/* Bảng sản phẩm */}
       <div className="bg-white rounded-lg shadow p-4">
